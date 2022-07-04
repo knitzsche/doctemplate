@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# set environment
+export DOC=index
+export CUSTOM=../customization
+export TYPE=xml
+export DEFAULT_BUILD=xml

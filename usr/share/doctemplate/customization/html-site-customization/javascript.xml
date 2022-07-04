@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<javascript>
+
+<script src="jquery.js">
+</script>
+
+<script xmlns="" type="text/javascript">
+    $(document).ready(function(){
+
+    setupSect1HrefsForSect2Spans();
+// start by hiding all sect1 divs
+    $('div.sect1').css({"display":"none"});
+    //$('div.article').css({"display":"none"});
+
+// onclick of an article in a toc, show the right div for sect1
+   $('span.article > a').click(function() {
+        var href=$(this).parent().parent().next().find("dl dt:first span a").attr("href");
+        $('div.sect1').css({"display":"none"});
+        $('h2.title').parent().css({"display":"block"});
+        //$('div.article').css({"display":"block"});
+        $('div.' + href).css({"display":"block"});
+    });
+
+// onclick of sect1 a in toc, show the right div for sect1
+   $('span.sect1 > a').click(function() {
+        var href=this.getAttribute("href");
+        $('div.sect1').css({"display":"none"});
+        //$('div.article').css({"display":"block"});
+        $('h2.title').parent().css({"display":"block"});
+        $('div.' + href).css({"display":"block"});
+    });
+
+// onclick of sect2 a in toc, show the right div for sect1
+   $('span.sect2 > a').click(function() {
+        var idLong=$(this).data("sect1");
+        var idShort=idLong.slice(1);
+        $('div.sect1').css({"display":"none"});
+        $('div[id="' + idShort + '"]').css({"display":"block"});
+    });
+
+
+    function setupSect1HrefsForSect2Spans() {
+/*
+This function adds a key ("sect1") to each a element that is
+a child of a span.sect2 whose value is the previous span.sect1>a[href].
+Thus, when one clicks the span.sect2>a, it already knows the sect1 div id (
+which is the same as the href) and therefore can show it
+*/
+        var div_sects = $("span.sect1, span.sect2");
+        var latest_sect1 = div_sects[0];
+        $(div_sects).each( function(i) {
+            if($(this).is(".sect1")) {
+                latest_sect1 = $("a", this).attr("href");
+            }
+            if($(this).is(".sect2")) {
+                $("a", $(this)).data("sect1", latest_sect1);
+            }
+        }
+        );
+    }
+
+});
+</script>
+</javascript>

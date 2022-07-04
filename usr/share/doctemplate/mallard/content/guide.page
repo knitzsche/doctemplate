@@ -1,0 +1,16 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="guide">
+
+  <info>
+    <link type="guide" xref="index"/>
+    <credit type="author">
+      <name>A Name</name>
+    </credit>
+  </info>
+
+  <title>
+      MyGuide <media type="image" mime="image/png" src="images/myguide.png">
+    </media> 
+  </title>
+</page>

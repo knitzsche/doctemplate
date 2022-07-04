@@ -1,0 +1,2 @@
+--stringparam html.stylesheet style.css
+--stringparam generate.index 0

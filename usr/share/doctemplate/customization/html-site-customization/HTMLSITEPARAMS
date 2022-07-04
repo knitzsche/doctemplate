@@ -1,0 +1,3 @@
+--stringparam html.stylesheet style.css 
+--stringparam admon.graphics 1
+--stringparam admon.graphics.path images/

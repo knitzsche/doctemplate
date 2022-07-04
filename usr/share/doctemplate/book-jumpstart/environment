@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export DOC=book
+export CUSTOM=../customization
+export TYPE=jumpstart-book
+export DEFAULT_BUILD=jumpstart

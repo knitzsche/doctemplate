@@ -1,0 +1,178 @@
+#header {
+        height: 64px;
+        margin: 10px;
+        overflow: hidden;
+        padding: 0;
+        position: relative;
+        top: 16px;
+        width: 100%;
+        background-color: #DD4814;
+}
+#headerlogo {
+        top: 25px;
+        right: 25px;
+        position: absolute;
+}
+body {
+    margin: 20px;
+    font-size: 90%;
+    font-family: sans-serif;
+}
+#page {
+    clear: both;
+    margin: 0;
+    padding: 10px 30px;
+}
+.firstname, .surname {
+    font-size: x-small;
+}
+
+ul {
+    margin-left: 5px;
+}
+
+.orderedlist {
+    margin-left: 5px;
+}
+
+.titlepage {
+  padding-right: 1em;
+}
+
+div.toc dt { 
+  margin-top: 2px; 
+}
+
+div.toc {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+div.toc {
+    position: fixed;
+    top: 80px;
+    height: 80%;
+    width: 21%;
+    left: 2%;
+    overflow : auto;
+    background-color: #dddddd;
+    border-style:solid;
+    border-width: 1px;
+    border-bottom-width: 3px;
+    border-color:#DD4814 #DD4814;
+    padding: 5px;
+}
+div.sect1 {
+    display: none;
+    position: absolute;
+    top: 80px;
+    width: 72%;
+    left: 25%;
+    overflow: auto;
+    background-color: #FFFFFF;
+    border-style:solid;
+    border-width: 1px;
+    border-bottom-width: 3px;
+    border-color:#DD4814 #DD4814;
+    padding: 5px;
+}
+a:link {
+    text-decoration: none;
+    color: #4B4B70;
+}
+a:visited {
+    text-decoration: none;
+    color: #704B6B;
+}
+a:active {
+    text-decoration: none;
+    color: #704B6B;
+}
+a:hover {
+    text-decoration: underline; 
+    color: #6C6CA1;
+}
+h1, h2, h3, h4, h5, h6
+{
+        margin: 0;
+        padding: 2px 0;
+        font-weight: normal; 
+        color: #5A3320;
+        line-height: 1.2em;
+}    
+h1, h2
+{
+    border-bottom: 2px solid #6d4c07; /* ubuntu dark brown */
+    font-size: 1.6em;
+}
+h3 {
+    font-size: 1.3em;
+}
+h4 {
+    font-size: 1.1em;
+}
+h4, h5, h6 {
+    font-size: 1em;
+}
+a img{
+  border: none;
+}
+dl {
+  margin-top: 0em; 
+  margin-bottom: 0.5em; 
+}
+dt {
+  margin-top: 1em; 
+}
+div.qandaset {
+    margin-left: 1em;
+}
+
+.guimenu, .guimenuitem, .guisubmenu {
+    font-style: italic;
+    color: #6d4c07; /* dark brown */
+}
+.guilabel, .guibutton { 
+}
+
+.question {
+  font-weight: bold;
+}
+/* accelerator keys in menus */
+.accel { 
+  text-decoration: underline;
+}
+.screen, .programlisting {
+    background-color:  #f0eee6; /* light salmon */
+    border: 1pt solid #C1B496; /* dark tan */
+    padding: 5px;
+} 
+#footer {
+    margin: 0;
+    font-size: 90%;
+    color: #444;
+}
+.revhistory { font-size: 09em; }
+table {
+    border-style:solid;
+    border-width: 1px;
+    border-color:#888;
+}
+td {
+    padding: 5px;
+    border-style:solid;
+    border-width: 1px;
+    border-color:#888;
+}
+.navfooter table {
+    border: none;
+}
+div[class="navfooter"]>table>tbody {
+    border: none;
+}
+div[class="navfooter"]>table>tbody>tr>td {
+    border: none;
+}
+div[class="note"]>table>tbody>tr>td {
+    border: none;
+}

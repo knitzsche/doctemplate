@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+<book>
+<bookinfo>
+<title>The Guide</title>
+<corpauthor>The Team</corpauthor>
+
+<mediaobject>
+    <imageobject>
+        <imagedata
+            fileref="images/ubuntu_wordmark_white.png"
+            format="PNG"
+            contentwidth="4in"
+            align="right"
+            />
+    </imageobject>
+</mediaobject>
+</bookinfo>
+<xincludes/>
+</book>

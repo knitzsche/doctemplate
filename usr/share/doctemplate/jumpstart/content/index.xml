@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html>
+<head>
+<title>Modular Book</title>
+
+<!--
+======== BOOK ASSETS: DO NOT MODIFY ============
+These book-level files are here only to enable the module
+to be displayed with book-level styling when the module is built.
+-->
+
+<link rel="stylesheet" href="book.css" type="text/css" />
+<script type="text/javascript" src="book-jquery-1.5.1.min.js" />
+<script type="text/javascript" src="book.js" />
+
+<!--
+======== MODULE ASSETS: MODIFY AS NEEDED ============
+
+You may insert module-specific:
+ * <link> elements to include external css files
+ * <script> elements to include external javscript files
+
+These MUST point to files in the module's subdirectory. For example, if the
+module's name is 'gettingstarted', the layout is like this:
+
+gettingstarted/content/gettingstarted/
+
+That directory must contain the module css and js files.
+
+And, the <link>'s href (for css) and the <script>'s src must point there,
+as in the following examples:
+
+-->
+<link rel="stylesheet" href="MODULENAME/mod.css" type="text/css" />
+<script type="text/javascript" src="MODULENAME/mod.js" />
+
+<!--
+CRITICAL NOTES:
+
+Module scripts are combined together into books that contain other arbitrary 
+modules, so all functions and variables must be named with the module name as 
+a prefix to prevent overlapping namespaces and functional errors.
+
+This also applies to css. Your module css selectors MUST refer specically to 
+module content or it will clash and overlap unpredictably with other module
+css. Overall css styling MUST be done at the BOOK level.
+
+-->
+
+</head>
+<body>
+<table class="book-table">
+<tr>
+
+<td class="book-table-col-prev" align="right">
+<div class="book-prev-topic">
+<button class="but_prev_topic">Prev Topic</button>
+</div>
+</td>
+
+<td class="book-table-col-modules" align="center">
+
+<!--
+
+Every module has a module div with
+ * class="module"
+ * id="MODULENAME", where MODULENAME is the unique name of this module.
+
+"MODULENAME" is:
+ * the name of the module project root directory (this may only be present on 
+build systems)
+ * the name of the assets sudirectory, as referred to above when 
+dicussing the <link> href and the <script> src attributes.
+
+Note also that image files included MUST be in the following MODULENAME directory:
+ * <modulename>/content/MODULENAME/images
+
+Localized images are placed in:
+ * workingdir/MODULENAME/images-LANGCODE on build systems
+
+Every module div must have one or more topic divs with:
+ * class="topic"
+ * id="MODULENAME-TOPICNAME"
+
+The TOPICNAME must be unique in the scope of this module. The "MODULENAME-" 
+prefix prevents different topics that might have the same name from stepping on \each other when arbitrary modules are remixed into books.
+
+-->
+
+<div class="module" id="MODULENAME">
+
+<div class="topic" id="MODULENAME-topic1">
+
+<h1>Module 1 Topic 1</h1>
+<button onclick="MODULENAME_sample();">Sample Module JS</button>
+<!--
+SAMPLE img reference must include the module name:
+<img src="MODULENAME/images/myimage.png" />
+-->
+<p>Some content</p>
+</div>
+
+<div class="topic" id="MODULENAME-topic2">
+<h1>Module 1 Topic 2</h1>
+<p>Some more content</p>
+</div>
+
+<div class="topic" id="MODULENAME-topic3">
+<h1>Module 1 Topic 3</h1>
+<p>Even more content</p>
+</div>
+
+</div>
+
+</td>
+
+<td class="book-table-col-next" align="left">
+<div class="book-next-topic">
+<button class="but_next_topic">Next Topic</button>
+</div>
+
+</td>
+
+</tr>
+
+</table>
+
+<div class="bookbuttons">
+<button class="but_prev_mod">Prev Module</button>
+<button class="but_next_mod">Next Module</button>
+</div>
+
+</body>
+</html>

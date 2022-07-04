@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# set environment
+# note that since mallard projects can have many .page files, there really is no
+# root DOC, nor are customizations supported yet
+export DOC=index
+export CUSTOM=../customization
+export TYPE=mallard
+export DEFAULT_BUILD=mallard

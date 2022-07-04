@@ -1,0 +1,166 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+]>
+
+<article id="index" lang="en">
+
+    <articleinfo>
+        <title>Doctemplate Docbook Element Guide</title>
+
+    <corpauthor/>
+
+<!--
+You can use XInclude to include other xml content in to this root document:
+        <xi:include href="legal.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+-->
+
+        <authorgroup>
+            <author>
+                <firstname>Kyle</firstname>
+                <surname>Nitzsche</surname>
+                <email>kylenitzsche@canonical.com</email>
+           </author>
+        </authorgroup>
+
+        <revhistory>
+           <revision>
+               <revnumber>1</revnumber>
+           </revision>
+        </revhistory>
+    </articleinfo>
+
+
+    <sect1 id="intro">
+    <title>Introduction</title>
+    <para>Doctemplate article and book projects are docbook (4.X). This means they  are written using the docbook dialect of xml.</para>
+    <para>Not all of docbook is known to work (docbook is quite large). This document shows the docbook elements that are known to work well in all supported output formats. It is recommended that you only use these docbook elements. If you use other docbook elements, you should generate the various types of output and verify that the styling is acceptible.</para>
+    <para>Actual docbook xml element source usage is not shown here. To see
+the usage in working source code, see (in an article project): content/article.xml.</para>
+    <para>Bugs regarding non-support of important docbook elements can be filed at <ulink url="https://launchpad.net/doctemplate"/>.</para>
+    </sect1>
+
+    <sect1 id="sections">
+    <title>Sections</title>
+
+    <para>This is a sect1.</para>
+    <para>Use sect1, sect2 and sect3 elements only. Do not use section elements</para>
+    <para>Each of these must have an id attribute that is unique in the whole document scope. For example, if you are making a book pdf with a doctemplate book, there must be no duplicate id attributes among all included articles.</para>
+
+    <sect2 id="test1">
+    <title>A Sect2</title>
+    <para>This is a sect2. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample texti.</para>
+    </sect2>
+
+    <sect2 id="test2">
+    <title>Another Sect2, with Sect3s</title>
+    <para>This is another sect2. It contains para elements and sect 3 elements.  Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. Sample text. 
+Sample text. Sample text. Sample texti.</para>
+
+    <sect3 id="test3">
+    <title>A Sect3</title>
+    <para>This is a sect3. Sample text. Sample text. Sample text. Sample text. Sample text.-Sample text. Sample text. Sample text. Sample text. Sample text. Sample text.-Sample text. Sample text. Sample texti.</para>
+    </sect3>
+    <sect3 id="test4">
+    <title>Another Sect3</title>
+    <para>This is another sect3. Sample text. Sample text. Sample text. Sample text. Sample text.-Sample text. Sample text. Sample text. Sample text. Sample text. Sample text.-Sample text. Sample text. Sample texti.</para>
+    </sect3>
+
+    </sect2>
+ 
+    </sect1>
+
+    <sect1 id="images">
+        <title>Images</title>
+        <para>This is an image.</para>
+        <para> All references in docbook source to images must be a path to a file in the "images/" directory. For example, in this case, the reference to the below image is: "images/sample.png".</para>
+        <para>Doctemplate supports default images with optional localized images preempting them. Thus, you can be sure to always have an image (the defaults), and if you want a localized image, just drop it in the right directory (with the same file name as the default image) and it is used instead.</para>
+        <itemizedlist>
+        <listitem><para>Default images must be placed in content/images/. For example: "images/sample.png"</para></listitem>
+        <listitem><para>Localized images, if any, must have the same filename as the default image and be placed in content/images-LOCALE, where LOCALE is the language's code as found in the LINGUAS file. For example, for Spanish (whose code is "es"): "images-es/sample.png"</para></listitem>
+        </itemizedlist>
+        <figure float="0">
+            <title>An image</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/sample.png" format="PNG"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </sect1>
+
+    <sect1 id="lists">
+    <title>Lists</title>
+
+    <para>Itemized list:</para>
+
+    <itemizedlist>
+        <listitem><para>An item</para></listitem>
+        <listitem><para>Another item</para></listitem>
+        <listitem><para>Yet another item</para></listitem>
+    </itemizedlist>
+
+
+    <para>Ordered (numbered) list:</para>
+    <orderedlist>
+        <listitem><para>An item</para></listitem>
+        <listitem><para>Another item</para></listitem>
+        <listitem><para>Yet another item</para></listitem>
+    </orderedlist>
+   </sect1>
+
+    <sect1 id="note">
+    <title>Notes</title>
+    <para>A note with no title:</para>
+    <note>
+        <para>Here is the note text.</para>
+    </note>
+    <para>A note with a title:</para>
+    <note>
+        <title>Note Title</title>
+        <para>Here is the note text.</para>
+    </note>
+    </sect1>
+
+    <sect1 id="url">
+    <title>Hyperlinks</title>
+    <para>This is a hyperlink: <ulink url="http://kylenitzsche.com"/>.</para>
+    </sect1>
+
+    <sect1 id="code">
+    <title>Code</title>
+    <para>Some in-line code: <code>scp -r thisdir me@somewrongthing.com:/test</code>. Back to usual para txt.</para>
+
+    <para>A code sample:<programlisting>
+    <![CDATA[
+#!/usr/bin/python
+
+import os
+import sys
+
+mydir = os.path.join(os.getcwd(), 'adir')
+if os.path.exists(mydir):
+    contents = os.listdir(mydir)
+    print str(contents)
+else:
+    print mydir + "does not exist."
+
+sys.exit(0)
+]]>
+    </programlisting></para>
+
+    </sect1>
+
+    <sect1 id="tables">
+    <title>Tables</title>
+
+    <table>
+        <tr><td>Person</td><td>Age</td></tr>
+        <tr><td>John</td><td>2</td></tr>
+        <tr><td>Mary</td><td>63</td></tr>
+        <tr><td>Chin</td><td>27</td></tr>
+    </table>
+    <note><para>Tables do not display well in docbook output format in the yelp help browser.</para></note>
+    </sect1>
+
+</article>

@@ -1,0 +1,1056 @@
+doctemplate (2.5.0.4) trusty; urgency=medium
+
+  * release for trusty
+  * change depends: ttf-takao-mincho > fonts-takao-mincho
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 29 Apr 2014 15:01:16 -0400
+
+doctemplate (2.5.0.3) trusty; urgency=medium
+
+  * package version modified only in order to build trusty version
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 08 Jan 2014 09:49:15 -0500
+
+doctemplate (2.5.0.2) saucy; urgency=low
+
+  * package version upgrade only so that suacy version is higher than raring
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 07 Jan 2014 11:27:34 -0500
+
+doctemplate (2.5.0.1~saucy1) saucy; urgency=low
+
+  * release for saucy
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 14 Nov 2013 09:32:05 -0500
+
+doctemplate (2.5.0.1~quantal1) quantal; urgency=low
+
+  * release for quantal
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 26 Jul 2013 15:39:12 -0400
+
+doctemplate (2.5.0.1) raring; urgency=low
+
+  * Add optional support for running postprocessing script in docbook phase
+    of build, as follows:
+    - Your customization branch (the one pointed to by the CUSTOM variable the
+      project 'environment' file must export DBSCRIPT variable whose value
+      is script name in CUSTOM/docbook-customization/. For example:
+      if environment has these:
+      export CUSTOM=../customization-brochure
+      export DBSCRIPT=brochure.sh
+      Then the following must exist:
+      ../customization-brochure/docbook-customization/brochure.sh
+    - That file "brochure.sh" is executed after the normal docbook phase. It may
+      1) run another xsl transform on the normal generated end file of the
+      docbook transform: build/docbook//LINGUA/DOC.xml generating a new file doc
+      2) rename the new files so the new generated doc is named
+      build/docbook//LINGUA/DOC.xml
+    - note that the script is passed three arguments in the following order:
+      1) the path to the customization dir (as defined in the project environment file)
+      2) the path to the current docbook build dir, including linguage, for example:
+      build/docbook/fr/
+      3) the name of the project's root content doc (withoout the .xml extension)
+      as defined in the project environment file.
+    - A sample DBSCRIPT:
+      #!/bin/bash
+      set -e
+      CUSTOM=$1
+      BDOCBOOK=$2
+      DOC=$3
+      xsltproc \
+          --stringparam showSlideTitles yes \
+          -o $BDOCBOOK/book.custom.xml \
+          $CUSTOM/docbook-customization/brochure.xsl \
+          $BDOCBOOK/$DOC.xml
+      # back up initial state of book.xml
+      cp $BDOCBOOK/book.xml build/docbook/en/book.xml.orig
+      mv $BDOCBOOK/book.custom.xml $BDOCBOOK/book.xml
+      exit
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 26 Jul 2013 15:36:15 -0400
+
+doctemplate (2.5.0~quantal1) quantal; urgency=low
+
+  * build for quantal
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 17 Jul 2013 23:48:59 -0400
+
+doctemplate (2.5.0) raring; urgency=low
+
+  * fix issue with previous release
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 17 Jul 2013 23:44:25 -0400
+
+doctemplate (2.4.3.11~quantal1) quantal; urgency=low
+
+  * build for quantal
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 17 Jul 2013 22:35:58 -0400
+
+doctemplate (2.4.3.11) raring; urgency=low
+
+  * Improve and replace the mechanism for passing module vcs revision so that
+    a customization layer may pull it into the content and so be available for
+    expression in pdfs. Here are the code comments that sum it up:
+    # if DOCBOOKPARAMS contains "showvcsrev yes " and build/vcsrev exists, add param with
+    # vcs rev from that file to xslt. Your customization layer may use that, for
+    # example adding it to a <releaseinfo> element and displaying that appropriately.
+    # Note: this functionality depends on some external mechanism placing the
+    # vcs revision in build/vcsrev, for example a wrapper build script that itself
+    # calls doctemplate_make
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 17 Jul 2013 22:33:48 -0400
+
+doctemplate (2.4.3.10~quantal) quantal; urgency=low
+
+  * build for quantal
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 16 Jul 2013 18:18:59 -0400
+
+doctemplate (2.4.3.10) raring; urgency=low
+
+  * add support for placing bzr rev into article pdfs if:
+    - the fop customization supports it (pkgd customization dir does not yet)
+    - some external mechanism places the bzr revno into build/bzrrevno before
+      doctemplate_make is run
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 16 Jul 2013 18:17:06 -0400
+
+doctemplate (2.4.3.9~quantal1) quantal; urgency=low
+
+  * build for quantal
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 16 Jul 2013 15:19:24 -0400
+
+doctemplate (2.4.3.9) raring; urgency=low
+
+  * support draft.mode as xslt param: --stringparam draft.mode yes|no
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 16 Jul 2013 15:12:26 -0400
+
+doctemplate (2.4.3.8~quantal1) quantal; urgency=low
+
+  * build for quantal
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 12 Jul 2013 13:00:00 -0400
+
+doctemplate (2.4.3.8) raring; urgency=low
+
+  * Add docbook profiling. Set profile params in:
+    CUSTOMIZATION/docbook-customization/DOCBOOKPARAMS like this:
+     --stringparam profile.userlevel l2
+    With that, any elements with a "userlevel" attribute are excluded unless
+    their value is l2.
+    Examples:
+      Included: <sect1 userlevel="l2">
+      Excluded: <sect1 userlevel="l3">
+      Included: <sect1>
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 11 Jul 2013 17:19:54 -0400
+
+doctemplate (2.4.3.7) raring; urgency=low
+
+  * For pdfs, allow specifying the font usd for each language with a dt_fontconfig
+    file present CUSTOMIZATION/fop-customization/. Note that if it is
+    present in the book/project root dir, it takes precedence. Default is provided
+    by doctemplate itself in /usr/share/doctemplate/lib/dt_fontconfig
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 03 Jul 2013 16:52:14 -0400
+
+doctemplate (2.4.3.6) raring; urgency=low
+
+  * bug fix to make previous commit customimzations work
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 24 Jun 2013 18:29:33 -0400
+
+doctemplate (2.4.3.5) raring; urgency=low
+
+  * when building pdf, default image with is overridable for ALL images with
+    --stringparam imagewidth 5in in FOPARAMS file, and on a per image basis
+    with <img width="5in" .... />
+  * expand2db.xsl is now customizable for pdf: simply copy from
+    /usr/share/doctemplate/xsl/expand2db.xsl into
+    customizations/fop-customization/expand2db.xsl
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 24 Jun 2013 16:14:39 -0400
+
+doctemplate (2.4.3.4~quantal1) quantal; urgency=low
+
+  * backport to quantal
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 13 Jun 2013 18:46:25 -0400
+
+doctemplate (2.4.3.4) raring; urgency=low
+
+  * usr/share/doctemplate/all/README: improved still terse README file
+  * usr/bin/doctemplate_make:
+    - improved output
+    - fixed book-docbook build. Previously it was failing when a content module
+      had no pot file. Now it uses the same build flow as book-pdf, except for
+      the pdf specific parts, fixing the problem.
+    - book-pdf: removed extra $arts var. just using $mods is sufficient.
+    - when an invalid arg is provided, don't output ERROR. Instead just show
+      help
+    - fixed error where image cp fails with error message when there are no
+    - images
+  * /usr/lib/doctemplate/doctemplate_functions:
+    - improved output
+    - fixed error where image cp fails with error message when there are no
+    - images
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 13 Jun 2013 18:43:37 -0400
+
+doctemplate (2.4.3.3~quanta1) quantal; urgency=low
+
+  * backport release to quantal
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 06 Jun 2013 19:51:17 -0400
+
+doctemplate (2.4.3.3) raring; urgency=low
+
+  * use FOPARMS file when bulding pdf book
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 06 Jun 2013 19:47:29 -0400
+
+doctemplate (2.4.3.2~quantal2) quantal; urgency=low
+
+  * remove glade and gtk dependencies
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 03 Jun 2013 12:38:08 -0400
+
+doctemplate (2.4.3.2~quantal1) quantal; urgency=low
+
+  * fix version typo
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 03 Jun 2013 12:04:06 -0400
+
+doctemplate (2.4.3.2~qauntal1) UNRELEASED; urgency=low
+
+  * add <c> as shorthand for <code>
+  * add <t> as shorthand for <title>
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 03 Jun 2013 12:01:26 -0400
+
+doctemplate (2.4.3.1) raring; urgency=low
+
+  * bug fix: expand2db.xsl should not have been wrapping pl multiline code
+    listings in CDATA.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 31 May 2013 11:52:57 -0400
+
+doctemplate (2.4.3) raring; urgency=low
+
+  * Support short hand names for docbook elements and structures. For actual
+    short hand names allowed in source and how they are converted into
+    docbook, see: usr/share/doctemplate/xsl/expand2db.xsl
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 31 May 2013 11:24:38 -0400
+
+doctemplate (2.4.2) raring; urgency=low
+
+  * always run xmllint first on content/$DOC (after xincludes) and exit 1 on
+    invalid xml
+  * drop the fop-cusomization book.titlepage.templates.xml since it was
+    redundant with my.titlepage.templates.xml. just use my...xml.
+  * fop 1.0 no longer requires font metrics, so these are now removed from
+    FONT.conf files.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 23 May 2013 11:05:57 -0400
+
+doctemplate (2.4.1) quantal; urgency=low
+
+  * build for quantal
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 17 May 2013 15:05:13 -0400
+
+doctemplate (2.4) precise; urgency=low
+
+  * build for precise
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 11 Apr 2012 17:04:32 -0400
+
+doctemplate (2.3) oneiric; urgency=low
+
+  * Make build type argument to doctemplate_make optional if project's
+    environment file defines DEFAULT_BUILD. If that is defined and no build
+    type arg is passed and $1, use it. In any case, if the build type
+    arg is passed, it takes precedence. new projects (doctemplate_create) now
+    come with a reasonable or the only default build type set. LP: #922688
+  * let po files live in project po/ dir (not in content/po). And let the build
+    copy them to content/po (before doing anything else). When projects are
+    bzr branches, one should bzr ignore content/po since this will churn
+    for no good reason: the real place for po files is po/. LP: #922659
+  * delete intermediary "*phase*" files in jumpstart book build. LP: #923812
+  * jumpstart book: let build output dir be build/jumpstart (instead of 
+    build/jumpstart-book). LP: #922683
+  * debian/copyright: changes to bring into conformance with latest spec
+  * debian/control: standards version to 3.9.2
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 30 Jan 2012 11:43:32 -0500
+
+doctemplate (2.2) oneiric; urgency=low
+
+  * add build depends on docbook-xsl in order to generate man pages in 
+    debian/rules
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 16 Nov 2011 20:31:19 -0500
+
+doctemplate (2.1) oneiric; urgency=low
+
+  * remove jquery files from customization dir and instead get from libjs-jquery
+    - add depends on libjs-jquery
+    - doctemplate_functions: copy jquery.js from:
+      /usr/share/javascript/jquery/jquery.js
+      into build/ dirs
+  * add build depends on xsltproc, needed to process man page
+  * add localization of jumpstart-book images
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 15 Nov 2011 14:51:33 -0500
+
+doctemplate (2.0) oneiric; urgency=low
+
+  * build for oneiric
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 28 Oct 2011 12:30:18 -0400
+
+doctemplate (1.9.39) natty; urgency=low
+
+  * usr/share/doctemplate/customization/html-customization/style.css: improve
+    sect2 title layout in html
+  * mv doctemplate_functons, which users should never call directly from 
+    /usr/bin to usr/lib/doctemplate. Modify doctemplate_make to use new 
+    FUNCTIONS var to call that scripts.
+  * debian/control: Change maintainer to Kyle Nitzsche and add 
+    ttf-ubuntu-font-family to depends
+  * add man pages for doctemplate_create, doctemplate_make and
+    doctemplate_update_translation, the only three user commands.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 29 Jul 2011 10:55:23 -0400
+
+doctemplate (1.9.38) natty; urgency=low
+
+  * customization/html-customization:
+    - javascript.xml implement user control to toggle content area to near full
+      screen. When in full mode, the navigation button panel moves to left side
+      of screen and buttons are veritical. And, the button panel stays in same 
+      vertical position even when scrolling page up and down.
+    - to accomplish the above, two new css styles introduced, div.sect1full, which
+      resizes div content div to near full screen size, and .buttonpanelsect1vertical
+      which rearranges the button panel that present content nagivation to
+      vertical stack orientatoin and fixed position. Also, made monospace text
+      black instead of orange for readability and made sect2 links in toc fit
+      into available space better (no margin above and below)
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 27 Jul 2011 15:05:09 -0400
+
+doctemplate (1.9.37) natty; urgency=low
+
+  * use jquery instead of customized docbook xslt in html output to add js
+    functions to TOC elements. This approach minimizes xslt customization and
+    is simpler:
+    - customization/html-customization/html-cusomtizatoin/xsl: removed customized
+      bits that inserted onclick("showdiv(..);" onto toc anchors because I'd rather
+      keep the xslt as pristine as possibled. Instead these functions are added
+      via javascript/jquery (see next bullet).
+    - Modified customization/html-custumization\javascript.xml code to insert 
+    showdiv functions to toc anchors when dom ready.
+  * change expected jquery file name in customization/html-customization to
+    jquery.js (instead of expecting a file name that includes the jquery version)
+    thus enabling updating to a new jquery version by simply dropping the 
+    library file into the custom dir. Note: now making html fails if jquery.js
+    is not found, with error message.
+  * removed adding buttonpanel and buttonpanelsect1 in xslt and instead add them
+    through javascript/jquery
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 18 Jul 2011 15:12:21 -0400
+
+doctemplate (1.9.36) natty; urgency=low
+
+  * doctemplate_create help still referred to old command name: doctemplate_setup
+  * doctemplate_make: fix bug where I did not enclose a bash var in double quotes
+  * book/environment: update TYPE to "book" (from former "book-pdf")
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 12 Jul 2011 14:23:26 -0400
+
+doctemplate (1.9.35) natty; urgency=low
+
+  * doctemplate_make: if command args include "draft", build book and article pdf
+    with draft styling (watermark, page header, etc))
+  * article project default document: improve style guide content
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 12 Jul 2011 11:43:17 -0400
+
+doctemplate (1.9.34) natty; urgency=low
+
+  * simplifiy doctemplate_make usage as follows:
+    doctemplate_make <build type>, where <build type> no longer needs to 
+    include the project type. For example, previously, to build a book project
+    to pdf, you would use: 'doctemplate_make book-pdf'. But to build an article
+    project to pdf, you would use: doctemplate_make pdf. Now, in both cases,
+    you use 'doctemplate_make pdf'. The code checks the TYPE variable defined
+    in the proejct's environment file and, by also consulting files in 
+    /usr/share/doctemplate/build-types, it determines the valid build types
+    for the current project type and enables the simple build types. If you
+    don't provide a build type or specify an invalid one, help displays that
+    lists the valid build types for the current project.
+  * also fixed epub build output for article projects to be standard layout,
+    with mimetype file and with included styles.css into OEBPS dir
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 30 Jun 2011 09:49:41 -0400
+
+doctemplate (1.9.33) natty; urgency=low
+
+  * usr/bin/doctemplate_make: book-epub, properly localize each module first
+  * usr/bin/doctemplate_functions: create book's build/epub/<lingua>/ layout
+    correctly, including deleting build artifacts and adding a css stylesheet
+    to OEPBS. This stylesheet must be named in the customization/epub-custom-
+    ization/EPUBPARAMS file with a line like this:
+    "--stringparam html.stylesheet styles.css"
+    And a css file by that name must exist in:
+    <customization>/epub-customization/
+  * dt_fontconfig: remove erroneous "." that broke it
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 29 Jun 2011 16:46:06 -0400
+
+doctemplate (1.9.32) natty; urgency=low
+
+  * doctemplate_make: add function to check for empty modules and quit if empty 
+    with error msg. call function from all book functions
+  * fix doctemplate_update_translations script from regressions due to recent 
+    refactoring. Relatedely: from doctemplate_function remove mallard's trans
+    function; instead, make f_pot and f_po work for mallard.
+  * html-site.xsl: change image paths for navig, admon, and callout to 
+    images/. images are now moved from customization/html-site-customization/\
+    images into build dir
+  * add some boilerplate copyright and license text to scripts
+  * standards version to 3.9.1
+  * make all environment files executable by user
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 22 Jun 2011 11:33:55 -0400
+
+doctemplate (1.9.31) natty; urgency=low
+
+  * add book-html-docbook build option for book projects. It builds html in a
+    docbooky style (albeit cusotmized by the doctemplate customization dir)
+  * when you build a book, for each lingua, add the po file to each module
+    automatically if needed. Note that such po files should be reviewed by 
+    translators to ensure their meta data is correct for the language (plural
+    forms and such)
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 20 Jun 2011 12:45:26 -0400
+
+doctemplate (1.9.30) natty; urgency=low
+
+  * add book-docbook build option for book projects
+  * add book-epub build option for book projects
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 17 Jun 2011 12:08:35 -0400
+
+doctemplate (1.9.29) natty; urgency=low
+
+  * changed book and book-jumpsart roject layout to match others: content/ dir 
+    contains xml and po/, and modules file specifies othe projects in the book 
+    instead of book.xml (and articles.xsl no longer needed to extract them).
+  * moved bookd-pdf build code from doctemplate_make into doctemplate_functions to
+    be like all others
+  * now if any po file is missing, it is always created and so builds succeed, 
+    although those po files should have their meta data reviwed
+  * improved command line output significantly
+  * when building (with doctemplate_make <type>) if you add a second arg that is
+    a path to a file that file is assumed to be a LINGUAS file and the build 
+    creates those lingua outputs
+  * when building a book for pdf, each article is only localied into the target 
+    LINGUAS
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 15 Jun 2011 14:50:14 -0400
+
+doctemplate (1.9.28) natty; urgency=low
+
+  * fix regression caused by previous release that resulted in book projects
+    not building to pdf.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 14 Jun 2011 17:03:45 -0400
+
+doctemplate (1.9.27) natty; urgency=low
+
+  * fix epub broken build
+  * move apache/<font>.conf files out of individual projects and into 
+    customization/fop-customization dir. So, you may delete the the lib/apache dir
+    from all projects. You must copy apache/* into any already existing
+    customization/fop-customization/ directories if you want to build pdfs (for
+    article and book projects).
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 10 Jun 2011 14:07:07 -0400
+
+doctemplate (1.9.26maverick1) maverick; urgency=low
+
+  * rebuild/push for maverick since some users are still on mav.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 08 Jun 2011 15:21:59 -0400
+
+doctemplate (1.9.26) natty; urgency=low
+
+  * update ubuntu.conf files since ubuntu font now refers to italic as "RI"
+    whereas previously it referred to it as "I"
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 08 Jun 2011 12:12:57 -0400
+
+doctemplate (1.9.25) natty; urgency=low
+
+  * jumpstart cleaning up/stripping down. Includes leaving xml declaration
+    in the final generated html files.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 07 Jun 2011 17:50:09 -0400
+
+doctemplate (1.9.24) natty; urgency=low
+
+  * change all project content dirs to 'content/'
+  * update README file installed into each project
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 25 May 2011 20:39:41 -0400
+
+doctemplate (1.9.23) natty; urgency=low
+
+  * change 'doctemplate_setup*' commands as follows:
+    - Previously, each command to setup a doctemplate project had a dedicated 
+      script in /usr/bin/. For example, doctemplate_setup-article and 
+      doctemplate_setup_book.
+    - Now there is one script: /usr/bin/doctemplate_create that takes an arg 
+      that specifies the type of project to create, for example:
+      'doctemplate_setup article'
+  * change 'doctemplate_make*' commands in same manner (only one command now)
+  * change html5module and html5 book projects to jumpstart and jumpstart-book,
+    everywhere
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 25 May 2011 16:49:49 -0400
+
+doctemplate (1.9.22) natty; urgency=low
+
+  * html5-book: complete get_module_head_links.xsl so that module's <script>
+    elements (in the <head>) are pulled into the html5 book.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 24 May 2011 18:33:24 -0400
+
+doctemplate (1.9.21) natty; urgency=low
+
+  * add mallard type project (doctemplate_setup_mallard, doctemplate_make_mallard
+    & doctemplate_update_translations modified for mallard's many *page model)
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 24 May 2011 15:59:45 -0400
+
+doctemplate (1.9.20) natty; urgency=low
+
+  * add debian/source to pick up debian source format native (3.0)
+  * add xml type module (doctemplate_setup_xml & doctemplate_make_xml)
+  * fix ubuntu.conf (an apache font config file) due to changed ttf file files
+    in natty
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 09 May 2011 23:12:09 +0200
+
+doctemplate (1.9.19) maverick; urgency=low
+
+  * add doctemplate html5 project type.
+    - Create in pwd with 'doctemplate_setup_html5module'.
+    - Build module  with 'doctemplate_make_html5'
+  * add book-html5 project type. Combines html5 project modules into html5 book.
+    - Create in pwd with 'doctemplate_setup_book_html5'.
+    - Edit 'modules' file to add lines that point at doctemplate html5 projects.
+    - Build with doctemplate_make_book_html5
+  * html5 modules are free standing and can be remixed into books. To suport this,
+    there are rules that govern the div structure of module index.xml files, and
+    how to add module-specific link tags to add css and script tags to add javascript.
+    These are explained in the module's xml/index.xml file (commented).
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 22 Mar 2011 17:50:37 -0400
+
+doctemplate (1.9.18) maverick; urgency=low
+
+  * Upgrade html output to have:
+    - ubuntu branding (initial)
+    - percentage (not pixel) based horizontal layout (nav and content areas)
+    - "+" and "-" buttons to expand the nav area (and let content area resize).
+      After user expands nav area, any other action restores the (roughly) 25/75
+      (nav/content) horiz layout
+    - "<" and ">" buttons for next/previous sect1 navigation
+    - simpler code throughjquery
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 08 Mar 2011 17:26:28 -0500
+
+doctemplate (1.9.17natty) natty; urgency=low
+
+  * same pkg, just released for natty.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 07 Mar 2011 11:17:52 -0500
+
+doctemplate (1.9.17) maverick; urgency=low
+
+  * Report duplicate id attribues and the files that contain them, if any,
+    when using doctemplate_make_book_pdf, then stop. Else continue.
+  * make directories in source pkg have same layout as installed dirs, for
+    simplification. 
+  * doctemplate_setup_article: create doctemplate_version file with only version
+    as contents (no extra words
+  * improve doctemplate_upgrade script.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 04 Mar 2011 16:57:10 -0500
+
+doctemplate (1.9.16) maverick; urgency=low
+
+  * doctemplate_functions script had extra lines trying to copy javascript.xml
+    file around when building html-ste. This file does not apply (yet) to 
+    html-site, so the script function (htmlsite) is modified to remove them.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 01 Mar 2011 16:08:20 -0500
+
+doctemplate (1.9.15) maverick; urgency=low
+
+  * Document the separation of cusomization layers from the article project
+    in the README file.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 01 Mar 2011 15:22:01 -0500
+
+doctemplate (1.9.14) maverick; urgency=low
+
+  * Remove article customization directories from new article projects. Instead,
+    the article's environment file now defines a variable (CUSTOM) that
+    provides the path to the dir that contains the required customization
+    layers. This allows one to make a customization and use it for any
+    article, instead of having to make the customization in each and every
+    article. The default/expected location for this directory is a sibling
+    directory to the article itself: <article>/../customization. The
+    doctemplate_setup_setup_article script now checks whether this directory
+    exists and prompts the user to find out whether it should be created.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 01 Mar 2011 15:07:38 -0500
+
+doctemplate (1.9.13) maverick; urgency=low
+
+  * Reconfigure/refactor installed files so they can be used to create new 
+    article and book projects more directly.
+  * Implement an Ubuntu brand (init) in article and book pdfs
+  * Fix bug wherein article was in static xpath position in bookx.xml, thus
+    enabling, for example <part>s.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 28 Feb 2011 22:03:06 -0500
+
+doctemplate (1.9.12) maverick; urgency=low
+
+  * Add Ubuntu font configuration and set it as the default for all languages
+    except those for which a more appropriate font is in place (ja and zh_TW).
+  * Add, for articles, html-site-customization/HTMLSITEPARAMS (to match other
+    output customization layers. This hold xsl params to pass to xslproc.
+  * Let book's LINGUAs be used to generate article localized xml, instead of 
+    always generating all of an article's localized xml, even when the article
+    includes linguas the book does not.
+  * Slightly better stdout on doctemplate_make_book_pdf
+  * Improved upgrade-doctemplate script, which now warns user to back up first
+    and waits for their answer before continuing.
+  * README file is expanded. And installed in new projects.
+  * Refactored src pkg directory layout to better match use case of createing
+    articles and books. This simplified doctemplate_setup-article/book
+    scripts.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 25 Feb 2011 21:17:03 -0500
+
+doctemplate (1.9.11) maverick; urgency=low
+
+  * Enable user to override default apache font config by adding dt_fontconfig
+    script to project dir. They can copy this script and pick up the default
+    font configurations from /usr/bin/dt_fontconfig. Note that adding a font 
+    configuration involves creating a conf file in 
+    <project>/lib/apache/<font>.conf that points to fop xml files. At the
+    moment, for examples look at the doctemplate font config files in
+    /usr/share/doctemplate/libe/apache.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 24 Feb 2011 17:01:58 -0500
+
+doctemplate (1.9.10) maverick; urgency=low
+
+  * Add Japanese basic font support for pdfs, and add ja.po and ja to LINGUAS.
+    Add ttf-takao-mincho to depends.
+  * Add Romanian po (ro.po) and ro to LINGUAS (font support already present)
+  * Fix bug that prevented pot file creation on article setup. Also renamed
+    user command to doctemplate_update_translations
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 24 Feb 2011 15:12:06 -0500
+
+doctemplate (1.9.9) maverick; urgency=low
+
+  * implemented dep5 debian/copyright file that includes lib/apache/*
+  * fixed updatepo function
+  * use base URL in font conf files for simplicity
+  * update README file for basic instructions
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 24 Feb 2011 11:28:29 -0500
+
+doctemplate (1.9.8) maverick; urgency=low
+
+  * Fix bug in book that prevented proper installation of apache font conf
+    files
+  * move xsl files to /usr/share/doctemplate/lib/xsl
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 24 Feb 2011 09:41:27 -0500
+
+doctemplate (1.9.7) maverick; urgency=low
+
+  * add html-site-customization/images/ (with logo.png) and copy these images
+    into all localized dirs. that is, there are images that are specific to
+    this cusotmization layer (html-site), and those images should live there,
+    not in article/images. Currently these images are not localizable, althoug
+    adding that capability is easily doable.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 23 Feb 2011 20:06:29 -0500
+
+doctemplate (1.9.6) maverick; urgency=low
+
+  * enhance doctemplate_upgrade to do everything required.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 23 Feb 2011 19:00:42 -0500
+
+doctemplate (1.9.5) maverick; urgency=low
+
+  * add usr/bin/doctemplate_upgrade_1.9.5: run this in each article to convert
+    from old-style Makefile building to scripted building with much cleaner
+    project directories
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 23 Feb 2011 17:15:23 -0500
+
+doctemplate (1.9.4) maverick; urgency=low
+
+  * Transition from using a Makefile in each project dir to bash functions
+    in /usr/bin/doctemplate_functions, sourced as needed from
+    doctempalte_make_* functions and seeded with lingua and other vars.
+  * content.Makefile no longer used to list root xml file name. Instead, use
+    DOC var in environment file.
+  * css files now live in html-customization and html-site-customization dirs
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 23 Feb 2011 16:50:55 -0500
+
+doctemplate (1.9.3) maverick; urgency=low
+
+  * add book support (pdf) (doctemplate_setup_book, doctemplate_make_book-pdf)
+  * use absolute paths in apache font conf files to support book and article
+  * simplify install scripts
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 15 Feb 2011 19:28:14 -0500
+
+doctemplate (1.9.2) maverick; urgency=low
+
+  * clean up style sheets
+  * change content of sample article to give examples of how to use docbook
+    elements for figures, tables, lists, code
+  * html-site: change page header to ubuntu orange with ubuntu logo
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 07 Feb 2011 16:29:19 -0500
+
+doctemplate (1.9.1) maverick; urgency=low
+
+  * change make_omf-template into doctemplate_make_omf_template
+  * and auto call it on article setup
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 24 Jan 2011 16:21:40 -0500
+
+doctemplate (1.9) maverick; urgency=low
+
+  * prep for 2.0
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 21 Jan 2011 16:50:42 -0500
+
+doctemplate (1.4-0ubuntu1ppa5) karmic; urgency=low
+
+  * lib/user.Makefile: fix typo: tempate.omf -> template.omf
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 10 Mar 2010 20:54:52 -0500
+
+doctemplate (1.4-0ubuntu1ppa4) karmic; urgency=low
+
+  * samples/sample-article/legal.xml: clean up
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 10 Mar 2010 20:50:23 -0500
+
+doctemplate (1.4-0ubuntu1ppa3) karmic; urgency=low
+
+  * lib/user.Makefile: epub-target: fix accidental paste 
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 10 Mar 2010 19:29:42 -0500
+
+doctemplate (1.4-0ubuntu1ppa2) karmic; urgency=low
+
+  * added html-site-customization dir/layer
+  * resent lib/environoment build defaults to "yes" since a template.omf file is
+    needed before user can run ./make_docbook
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 05 Mar 2010 16:20:36 -0500
+
+doctemplate (1.4-0ubuntu1ppa1) karmic; urgency=low
+
+  * lib/environment: set build omf defaults to 'no'
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 02 Mar 2010 14:50:34 -0500
+
+doctemplate (1.4) karmic; urgency=low
+
+  * New upstream release
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 02 Mar 2010 14:17:33 -0500
+
+doctemplate (1.3-0ubuntu0ppa24) karmic; urgency=low
+
+  * rebuilding with pristene upstream source tar.gz
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 02 Mar 2010 12:52:34 -0500
+
+doctemplate (1.3-0ubuntu0ppa23) karmic; urgency=low
+
+  * debian/control:
+    - modified Maintainer field
+    - added XSBC-Original-Maintainer field
+    - changed build dep python-dev to python
+    - changed Standards-Version field to 3.8.4
+    - modified Description slightly 
+    - add depends on ttf-dejavu
+  * debian/copyright:
+    - changed copyright dates to 2009. 
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 26 Feb 2010 11:27:14 -0500
+
+doctemplate (1.3-0ubuntu0ppa22) karmic; urgency=low
+
+  * change name of omf template creation script to make_omf_template
+  * add back sample-article/book.Makefile > content.Makefile
+  * omf template now created in root dir
+  * make_omf_template now inserts correct dtd for xhtml and xml into generated
+    omf files
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Sat, 20 Feb 2010 13:41:31 -0500
+
+doctemplate (1.3-0ubuntu0ppa21) karmic; urgency=low
+
+  * add environment file to hold common env variables (and remove 
+    content.Makefile)
+  * add configurable creation of C omf for html and xml
+  * add configurable creation of localized omfs for html and xml
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 19 Feb 2010 16:47:35 -0500
+
+doctemplate (1.3-0ubuntu0ppa20) karmic; urgency=low
+
+  * put common parts of setup scripts into doctemplate_setup_common
+  * put *PARAMS files into *-customization dires
+  * better fop default title page style: page break before leval
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 05 Feb 2010 16:52:29 -0500
+
+doctemplate (1.3-0ubuntu0ppa19) karmic; urgency=low
+
+  * improve html-site output in many ways
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 05 Feb 2010 15:15:21 -0500
+
+doctemplate (1.3-0ubuntu0ppa18) karmic; urgency=low
+
+  * Add epub output format, customization layer, etc
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 02 Feb 2010 09:59:33 -0500
+
+doctemplate (1.3-0ubuntu0ppa17) karmic; urgency=low
+
+  * lib/user.Makefile: 
+    - fix defintion of HTMLXSL
+    - in html-site-target: remove erroneous "./" before $(LIB)
+  * add "Powered by Doctemplate" link below html toc:  
+    - lib/html-customization/mytitlepage.xsl
+    - lib/style.css
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Tue, 26 Jan 2010 10:54:25 -0500
+
+doctemplate (1.3-0ubuntu0ppa16) karmic; urgency=low
+
+  * doctemplate_*: writes the installed version of doctemplate 
+    to doctemplate_version
+  * lib/style.css: add style for second line indent in toc
+  * scripts/user/update_pot_pos: remove incorrect and unnecessary type="book" argument
+  * lib/user.Makefile: update_po target: remove incorrect "./" in front of $(LIB)
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 21 Jan 2010 12:01:41 -0500
+
+doctemplate (1.3-0ubuntu0ppa15) karmic; urgency=low
+
+  * lib/html-customization/: show div on toc line click based on id from 
+    docbook source instead of based on title because title is localized and
+    therefore varies by language. Also, there should be no hard requirement
+    that the sect1 id attribute equals the title.
+    - html-customization.xsl: add sect1 template to insert id into html div
+    - javascript.xml: showdiv(): show div based on id
+
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 15 Jan 2010 15:34:09 -0500
+
+doctemplate (1.3-0ubuntu0ppa14) karmic; urgency=low
+
+  * actually making previous change to scripts/build/doctempalte_setup_book
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 15 Jan 2010 14:51:44 -0500
+
+doctemplate (1.3-0ubuntu0ppa13) karmic; urgency=low
+
+  * lib/user.Makefile: use $LIB to point to /usr/share/doctemplate/lib instead
+    of installing lib dir in each project
+  * scripts/build/doctempalte_setup*: for ^^, don't install lib in each project,
+    but do install apache dir into project lib/
+  * lib/pdf.Makefile: same
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 15 Jan 2010 14:33:31 -0500
+
+doctemplate (1.3-0ubuntu0ppa12) karmic; urgency=low
+
+  * lib/user.Makefile: rename html-target-dev to html-target and delete old 
+    html-target (<-dev cruft cleanup).
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 13 Jan 2010 13:34:21 -0500
+
+doctemplate (1.3-0ubuntu0ppa11) karmic; urgency=low
+
+  * This release contains many changes in the following areas:
+    - Standard approach to customization: docbook, fop and html customization 
+      param files and xsl (for overring standard templates). Note that the 
+      *PARAM files mentioned in the previous log entry are moved (with other 
+      files) to lib/<type>-customization/, and COMMONPARAMS is renamed to 
+      DOCBOOKPARAMS.
+    - The lib/html-customizaton and fop-customization dirs implement the 
+      "spec file" based approach to titlepage customization. 
+    - html generation is now done in two passes: xinclude and docbook.xsl 
+      instead of several, which facilitates customization in the 
+      usual way (docbook template overrides instead of separate transforms
+      to insert html attributes for css)
+    - lib/style.css: better design
+    - javascript inserted to generated html through standard docbook xsl
+      approach and modified to use new override-based html 
+    - automatic support for fop hyphenization pattern use if the user
+      adds lib/apache/fop-hyph.jar
+    - much better pdf layout, with page break after title page, after TOC
+      and more
+ 
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 13 Jan 2010 12:24:28 -0500
+
+doctemplate (1.3-0ubuntu0ppa10) karmic; urgency=low
+
+  * now there are three user-configurable files for xslt params:
+    - COMMONPARAMS: applied to first transform of xml, therefore always 
+  applied
+    - HTMLPARAMS: only applied with make_html (after COMMON, of course)
+    - FOPARAMS: only applied with make_pdf (after COMMON, of course)
+  * Much improved make_* command line output
+  * move user's style.css to project root, instead of using the one in project's
+    lib/style.css, in order to allow a user to customize style.css and not have
+    the customizations blown away when they update a project from a new version
+    of doctemplate (no user-cutomizable files should be in lib, theoretically)
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 08 Jan 2010 11:26:58 -0500
+
+doctemplate (1.3-0ubuntu0ppa9) karmic; urgency=low
+
+  * Change name of PROFILES file to DOCBOOKPARAMS, since it is more general
+  * lib/user.Makefile: changed to accommodate above
+  * lib/Makefile.am: same
+  * scripts/build/setup*: same
+  * lib/DOCBOOKPARAMS: moved params that used to be in user.Makefile here 
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 07 Jan 2010 14:40:55 -0500
+
+doctemplate (1.3-0ubuntu0ppa8) karmic; urgency=low
+
+  * add doctemplate_update_project, which updates non content and non project
+    configuration files from installed package files
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 24 Dec 2009 09:27:09 -0500
+
+doctemplate (1.3-0ubuntu0ppa7) karmic; urgency=low
+
+  * fop-customization.xsl should be copied to project root dir so project can
+    be updated without deleting project config. setup scripts need to copy it
+    there and pdf.Makefile needs to find it there, which constitute this change.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 23 Dec 2009 18:43:16 -0500
+
+doctemplate (1.3-0ubuntu0ppa6) karmic; urgency=low
+
+  * add lib/fop-customizations to enable user to put FOP params into xsl that's 
+    always called. Also enables use of FOP params that cannot be expressed as 
+    simple values and passed to xsltprof but instead must be expressed as nested
+    xml.
+  * modify lib/pdf.Makefile to call fop-customization.xsl (which includes the fo
+    xsl) instead of the fo.xsl directly.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 23 Dec 2009 16:02:44 -0500
+
+doctemplate (1.3-0ubuntu0ppa5) karmic; urgency=low
+
+  * add FOPARAMS file to enable user to list param/value pairs to be used by FOP
+    when creating pdfs
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 23 Dec 2009 14:22:21 -0500
+
+doctemplate (1.3-0ubuntu0ppa4) karmic; urgency=low
+
+  * add support for docbook profiles
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 23 Dec 2009 12:14:55 -0500
+
+doctemplate (1.3-0ubuntu0ppa3) karmic; urgency=low
+
+  * Add extended description to debian/control 
+  * fixed couple other lintian errors in debian/control and copyright 
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 21 Dec 2009 16:29:57 -0500
+
+doctemplate (1.3-0ubuntu0ppa2) karmic; urgency=low
+
+  * generate Makefile.in files so pkg can build in ppa
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 21 Dec 2009 12:46:00 -0500
+
+doctemplate (1.3-0ubuntu0ppa1) karmic; urgency=low
+
+  * first upstream release
+  * removed debian/install
+  * added Makefile.am files for all  
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Mon, 21 Dec 2009 12:32:16 -0500
+
+doctemplate (1.2.1) karmic; urgency=low
+
+  * numerous changes to support a single build approach to articles and 
+    books. Now, there is only one file that needs to be edited to modify
+    content files and dirs: content.Makefile.
+  * also made some css.xsl and style.css changes that removed unnecessary 
+    div tags with classes into generated html.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Thu, 17 Dec 2009 18:09:33 -0500
+
+doctemplate (1.2) karmic; urgency=low
+
+  * remove documentation dir & install thereof (for now)
+  * fix samples/sample-book.Makefile typo
+  * remove start.sh (not needed now that this is packaged
+  * mv lib/TYPE to samples/article.TYPE and samples/book.TYPE
+  * update scripts/build/* to copy article.TYPE or book.TYPE to lib/TYPE
+  * modify throughout so book content dirs are all siblings
+  * add dejavu apache font xmls and config and update make_pdf accordingly
+  * add updates_pots_pos so user never calls make but only uses scripts
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Fri, 11 Dec 2009 12:51:19 -0500
+
+doctemplate (1.1) karmic; urgency=low
+
+  * The first debianized version.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Sat, 05 Dec 2009 09:15:03 -0500
+
+doctemplate (1) karmic; urgency=low
+
+  * Init.
+
+ -- Kyle Nitzsche <kyle.nitzsche@canonical.com>  Wed, 20 Nov 2009 08:22:11 +0000

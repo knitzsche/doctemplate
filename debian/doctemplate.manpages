@@ -1,0 +1,3 @@
+debian/doctemplate_create.1
+debian/doctemplate_make.1
+debian/doctemplate_update_translations.1

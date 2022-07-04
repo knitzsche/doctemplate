@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# set environment
+export DOC=article
+export CUSTOM=../customization
+export TYPE=article
+export DEFAULT_BUILD=html

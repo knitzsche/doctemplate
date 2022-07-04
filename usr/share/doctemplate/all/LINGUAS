@@ -1,0 +1,13 @@
+# Here you can list the language code to which you would like to translate the
+# xml files to from the PO files.
+# Please keep this list sorted alphabetically
+#
+# Example:
+# ca
+# de
+en
+es
+ja
+ro
+ru
+zh_TW

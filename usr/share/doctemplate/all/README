@@ -1,0 +1,150 @@
+# This file is part of Doctemplate
+# Copyright (c) 2011-2013 Kyle Nitzsche
+#                    Canonical
+#
+# This program is free software: you can redistribute it and/or modify it-
+# under the terms of the GNU General Public License version 3, as published-
+# by the Free Software Foundation.
+
+# This program is distributed in the hope that it will be useful, but-
+# WITHOUT ANY WARRANTY; without even the implied warranties of-
+# MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR-
+# PURPOSE.  See the GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along-
+# with this program.  If not, see <http://www.gnu.org/licenses/>.
+################################################################
+
+Welcome to the doctemplate project.
+
+== About Doctemplate  ==
+
+See https://launchpad.net/doctemplate
+
+doctemplate provides:
+ * an easy-to-use approach
+ * to writing single-sourced xml content modules (mallard, docbook articles, xml, jumpstart)
+ * and books (collections of modules)
+ * with automatic localization (languages and images)
+ * multiple output formats including mallard, docbook, pdf, html
+ * including standard docbook output-specific customization layers
+ * and easy integration with Launchpad translations
+
+The guiding principle is: solve the technical problems so content
+developers can get to it.
+
+== Articles and Books ==
+
+You create a doctemplate "article" project for each topic. A topic is a "chunk" of content that should remain together. You can think of article projects as "content modules". You can build the article into various output formats (pdf, html, etc.). The article is built into whatever localizations you want (with translations and localized images). Article projects alone are excellent and sufficient for many uses.
+
+You can also create doctemplate "book" project. The purpose of a book project is to remix whatever article projects you want into a single built deliverable. A book project consists of some book specific content (for example title and author). The book project also pulls in whatever articles you want. You simlply list the articles you want in your book in a single file, the "modules" file. Then, when you build the book, the modules (articles) are included. Naturally, book is built into whatever localizations you want (translations and images).
+
+== Directories ==
+
+Every doctemplate project (articles, books, etc.) exists in a dedicated directory. For example, you could have the following projects in a directory:
+* introduction-to-oil-painting (an article project)
+* materials (an article project)
+* oil-painting (a book project)
+
+
+
+
+
+== Create a Project: 'doctemplate_create'  ==
+
+Each module or book is a doctemplate project. You create a project in the current directory with the 'doctemplate_create <project type>' command. (Don't specify a type to display the list of possible types.)
+
+The single-source content is in the content/ directory.
+
+The type of project is defined by "TYPE=" in the 'environment' file.
+
+The root xml file (without its '.xml' file extension) is defined by "DOC=" in the 'environment' file. Note that this document must be in the content/ directory.
+
+The languages you want to build are listed in the LINGUAS file.
+
+== Build a Project 'doctemplate_make' ==
+
+Building your project means creating localized outputs in the desired format. 
+
+Generated localized outputs are created in the build/<type>/<lang>/ directory. (Delete the build/ directory at any time: it and its contents are generated on every build.)
+
+Build with 'doctemplate_make <type>' command. To display the build types, run 'doctemplate_make help'. When run with no arguments, the default build type is used. You can set this in the project ./environment file by modifying "export DEFAULT_BUILD=<type>" 
+
+Note that different types of projects support different output formats and therefore build types. For example, a docbook article project can be build into: two types of html, pdf, docbook, and epub. Whereas a docbook mallard project can be built into mallard only.
+
+== Translation ==
+
+The LINGUAS file lists the languages your project builds.
+
+There are two directory for GNU gettext po files:
+ * po/: Use this to store your real translation files. Any translation files here are copied into content/po/ on each build. When you update actual translations, place them in this directory. You may add this directory to revision control, if any.
+ * content/po/: Used at build time to generate translated output. As noted, first translation files from po/ are copied here, if any. All po files are updated from the *.pot file and any that are missing are created. Typically this directory is ignored in revision control since the files are modified on every build.
+
+One way to translate a project into a set of languages is:
+ * Ensure the LINGUAS file specifies the target languages
+ * Build the project with 'doctemplate_make'. This copies persistent po files that contain current translations to content/po/, and updates them from the current content. 
+ * Copy the content/po/*po files elsewhere. Have them translated. Place them in po/. Check them into the revision control system, if any.
+
+Each project is translated as an independent unit. For example, when your book project includes several article projects, the book is built using the translations each article project provides. Any content that is specific to the book and does not exist in a article (for example the title page of a book project, is translated in the book project, exactly the same as for an article project.
+
+== Localized Images ==
+
+Default images are in the project's content/images directory. Content source references should always point there, without worrying about localization, for example, with docbook:
+<imagedata fileref="images/myimage.png" format="PNG"/>
+
+With mallard:
+<media type="image" mime="image/png" src="images/myguide.png">
+
+If you want to use a different image for a given language, for example Spanish, you need to know the Spanish iso code (which is 'es'), and create a directory in content/ named images-<code>, for example: content/images-es for Spanish.
+
+Then, put the Spanish version of the image file into content/images-es, with the same file name. It will be used for all Spanish build outputs instead of the default file. You do not need to modify references to the file in source (modified source references will not work.)
+
+== Book Projects ==
+
+Book projects combine a set of module projects at build time.
+
+The modules are identified in the book's 'modules' file, where each line is a path to the root directory of a module project.
+
+There are currently two types of books:
+ * book: composed of 'article' type projects. These are docbook articles. 
+ * book-jumpstart: composed of 'jumpstart' type projects. These are html modules where the book provides the framework and navigation controls. Specify the jumpstart modules you want to include by editing the 'modules' file.
+
+== Article Project: Docbook Elements ==
+
+Docbook is a large xml dialect. The current set of recommended docbook
+elements are in the sample-article that is created when you make an
+article project. These docbook elements are a basic set that cover a wide range of common needs and that are known to work in all output formats.
+You should create an article project, review is sample article (content/article.xml), and build it into supported output formats to see how the elements are displayed.
+
+This is far from the complete set of docbook elements. I would expect that most
+docbook elements work, but since I have not tested them, I am not yet sure.
+
+The current set is sufficient to support basic use cases. If you would like
+specific additional elements considered for addition, create a bug to this effect
+on launchpad.net/doctemplate.
+
+== Font selection for PDFs ==
+
+Different fonts cover different languages' scripts. 
+
+Doctemplate provides some default font configurations:
+ * ubuntu font: as the default
+ * wqy: for Chinese/Traditional (zh_TW)
+ * japanese-gothic for Japanese (ja)
+
+You can configure additional fonts, although this process is not yet
+documented. I would like to encourage a growing list of font configurations
+to support more and more of the world's scripts by default.
+
+If you happen to know which font is the best one for a given language/script,
+please (for now) create a bug on the launchpad.net/doctemplate project to 
+make this helpful suggestion. Note that the font must be available through 
+normal Ubuntu archives.
+
+== Caveats ==
+
+PDFs cannot be yet created for Right-to-left languages (Arabic and Hebrew).
+Apache FOP is used to create PDF currently, and this is not yet supported:
+http://xmlgraphics.apache.org/fop/compliance.html. See Writing-mode-related
+Properties section.
+

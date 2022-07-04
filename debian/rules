@@ -1,0 +1,28 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	xsltproc --nonet \
+	--param make.year.ranges 1 \
+	--param make.single.year.ranges 1 \
+	--param man.charmap.use.subset 0 \
+	-o debian/ \
+	/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl \
+	debian/doctemplate_create.1.xml
+	xsltproc --nonet \
+	--param make.year.ranges 1 \
+	--param make.single.year.ranges 1 \
+	--param man.charmap.use.subset 0 \
+	-o debian/ \
+	/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl \
+	debian/doctemplate_make.1.xml
+	xsltproc --nonet \
+	--param make.year.ranges 1 \
+	--param make.single.year.ranges 1 \
+	--param man.charmap.use.subset 0 \
+	-o debian/ \
+	/usr/share/xml/docbook/stylesheet/docbook-xsl/manpages/docbook.xsl \
+	debian/doctemplate_update_translations.1.xml
+	dh_auto_build

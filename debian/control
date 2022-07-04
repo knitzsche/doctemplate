@@ -1,0 +1,19 @@
+Source: doctemplate
+Section: doc
+Priority: extra
+Maintainer: Kyle Nitzsche <kyle.nitzsche@canonical.com>
+Build-Depends: debhelper (>= 7.0.50), python, xsltproc, docbook-xsl
+Standards-Version: 3.9.2
+Vcs-Bzr: https://code.launchpad.net/~doctemplate-team/doctemplate/doctemplate-main
+
+Package: doctemplate
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends},
+ fop, docbook-xsl, gettext, gnome-doc-utils, ttf-liberation,
+ ttf-wqy-zenhei, ttf-dejavu, fonts-takao-mincho,  ttf-ubuntu-font-family,
+ libjs-jquery
+Description: Localizes many xml dialects and generates multiple output formats
+ An xml localization build system that supports many xml dialects (including
+ xml, docbook, mallard, jumpstart), with built-in translation through po
+ files, with image localization without config files, that generates multilpe 
+ output formats, including pdf, xml, docbook, html, html (docbook), epub.

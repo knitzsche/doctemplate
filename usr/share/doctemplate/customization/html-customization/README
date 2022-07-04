@@ -1,0 +1,7 @@
+For help, see: http://www.sagehill.net/docbookxsl/HTMLTitlePage.html
+
+ 1) make your titlepage customizations in: my.titlepage.templates.xml
+ 2) generate mytitlepage.xsl with this command:
+xsltproc -o mytitlepage.xsl /usr/share/xml/docbook/stylesheet/docbook-xsl/template/titlepage.xsl my.titlepage.templates.xml
+
+Note: mytitlepage.xsl is imported into your html-customization.xsl

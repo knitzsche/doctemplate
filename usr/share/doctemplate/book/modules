@@ -1,0 +1,3 @@
+# for each module project you want to include, add a line that is the path from this directory to the module project.
+#../article1
+#../article2

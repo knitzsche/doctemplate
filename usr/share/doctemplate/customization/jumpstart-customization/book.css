@@ -1,0 +1,136 @@
+
+.home {
+    padding: 5px;
+
+}
+body {
+    background-color: #AEA79F;
+    font-family: Ubuntu, sans-serif;
+}
+h2, h1, h3, h4, h5 {
+/*    background-color: #DD4814; */
+    color: #DD4814;
+}
+/*
+div.book-prev-topic {
+    display: block;
+    position: fixed;
+    top: 50%;
+    width: 8%;
+    left: 2%;
+}
+div.book-next-topic {
+    display: block;
+    position: fixed;
+    top: 2%;
+    width: 8%;
+    right: 92%;
+}
+
+div.module {
+    display: none;
+    position: fixed;
+    top: 2%;
+    width: 80%;
+    left: 10%;
+    height: 80%;
+    overflow: auto;
+    background-color: #FFFFFF;
+    border-style:solid;
+    border-width: 1px;
+    border-bottom-width: 3px;
+    border-color:#DD4814 #DD4814;
+    padding: 5px;
+}
+div.topic {
+    display: block;
+    position: fixed;
+    top: 4%;
+    width: 75%;
+    height: 75%;
+    overflow: auto;
+    background-color: #dddddd;
+    border-style:solid;
+    border-width: 1px;
+    border-bottom-width: 3px;
+    border-color:#DD4814 #DD4814;
+    padding: 5px;
+}
+*/
+table.book-table {
+    width: 100%
+}
+table.book-table-col-prev {
+    width: 10%
+}
+table.book-table-col-modules {
+    width: 80%
+}
+table.book-table-col-next {
+    width: 10%
+}
+div.module {
+    display: none;
+    top: 2%;
+    height: 700px;
+    width: 80%;
+    overflow: auto;
+    background-color: #FFFFFF;
+    border-style:solid;
+    border-width: 1px;
+    border-bottom-width: 3px;
+    border-color:#DD4814 #DD4814;
+    padding: 5px;
+}
+div.topic {
+    display: none;
+    top: 4%;
+    width: 78;
+    height: 75%;
+    overflow: auto;
+    background-color: #dddddd;
+    border-style:solid;
+    border-width: 1px;
+    border-bottom-width: 3px;
+    border-color:#DD4814 #DD4814;
+    padding: 5px;
+}
+
+.bookbuttons {
+    position: fixed;
+    top: 90%;
+    left: 40%;
+    margin-top: 25px;
+}
+button {
+    height: 25px;
+}
+a:link {
+    text-decoration: none;
+    color: #333333;
+}
+a:visited {
+    text-decoration: none;
+    color: #DD4814;
+}
+a:active {
+    text-decoration: none;
+    color: #333333;
+}
+a:hover {
+    text-decoration: underline; 
+    color: #DD4814;
+}
+
+.filename {
+    font-family: monospace;
+}
+.programlisting {
+    margin: 10px;
+    padding: 10px;
+    color: #DFFFA1;
+    border-style:solid;
+    border-width: 1px;
+    border-color:#888888 #888888;
+    color: #DD4814
+}

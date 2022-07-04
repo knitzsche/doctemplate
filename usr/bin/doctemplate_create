@@ -1,0 +1,198 @@
+#!/bin/bash
+# This file is part of Doctemplate
+# Copyright (c) 2011 Kyle Nitzsche
+#                    Canonical
+#
+#This program is free software: you can redistribute it and/or modify it-
+#under the terms of the GNU General Public License version 3, as published-
+#by the Free Software Foundation.
+
+#This program is distributed in the hope that it will be useful, but-
+#WITHOUT ANY WARRANTY; without even the implied warranties of-
+#MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR-
+#PURPOSE.  See the GNU General Public License for more details.
+
+#You should have received a copy of the GNU General Public License along-
+#with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+if [ -e "environment" ]; then
+    echo -e "\nWARNING: You seem to already be inside a project."
+    echo -e "If you continue, your project files will be deleted."
+    echo -e "Continue? [y/n]"
+    read ANSWER
+    if [ $ANSWER != 'y' ] ; then
+        exit 1
+    fi
+fi
+
+function customizationdir() {
+    if [ ! -d "../customization" ]; then
+        echo -e "\nYou do not appear to have such a default ../customization dir."
+        echo -e "Would you like one created? [y/n]"
+
+        read ANSWER
+        if [ $ANSWER == 'y' ] ; then
+            cp -r $DATADIR/customization ..
+        fi
+    fi
+}
+
+DATADIR=/usr/share/doctemplate
+
+function article () {
+    echo -e "$(apt-cache policy doctemplate | grep Installed | sed s_\ \ Installed:\ __)" > doctemplate_version
+
+    cp -r $DATADIR/article/* .
+    cp -r $DATADIR/all/* .
+
+    echo -e "\nYour Doctemplate article directory is set up."
+    echo -e "\nDoctemplate articles require a directory that contains"
+    echo -e "customization data. By default, this directory is expected to"
+    echo -e "be next to the aritcle directory:"
+    echo -e "\tparentdir/articledir"
+    echo -e "\tparentdir/customization"
+
+    customizationdir
+
+    echo -e "\nNOTE: the article's 'environment' file defines a variable (CUSTOM)"
+    echo -e "that must point at your customization directory."
+
+    echo -e "\nAll commands start with 'doctemplate_'"
+
+    . ./environment
+
+    # get module name, which is the project dir
+
+    modulename=$(basename $(pwd))
+
+    sed -i 's_id=\"_id=\"'$modulename'_g' content/article.xml
+
+    #doctemplate_update_translations
+
+}
+
+
+function book () {
+    echo -e "$(apt-cache policy doctemplate | grep Installed | sed s_\ \ Installed:\ __)" > doctemplate_version
+
+    cp -r $DATADIR/book/* .
+    cp -r $DATADIR/all/* .
+
+    customizationdir
+}
+
+function jumpstart () {
+    echo -e "$(apt-cache policy doctemplate | grep Installed | sed s_\ \ Installed:\ __)" > doctemplate_version
+
+    cp -r $DATADIR/jumpstart/* .
+    cp -r $DATADIR/all/LINGUAS .
+    cp -r $DATADIR/all/README .
+
+    echo -e "\nYour Doctemplate jumpstart module project directory is set up."
+    echo -e "\nSuch projects require a directory that contains"
+    echo -e "customization data. By default, this directory is expected to"
+    echo -e "be next to the jumpstart project directory:"
+    echo -e "\tparentdir/jumpstart"
+    echo -e "\tparentdir/customization"
+
+    customizationdir
+
+    echo -e "\nNOTE: the project's 'environment' file defines a variable (CUSTOM)"
+    echo -e "that must point at your customization directory."
+
+    echo -e "\nAll commands start with 'doctemplate_'"
+
+    # get module name, which is the project dir
+    modulename=$(basename $(pwd))
+
+    # put modulename in environment file
+    echo "export MODULE=$modulename" >> environment
+
+    . ./environment
+
+    #doctemplate_update_translations
+
+    # create xml/<modulename>/images
+    mkdir -p content/$modulename/images
+    mkdir -p content/$modulename/images-es
+
+    # correct attributes in xml/index.xml to use module name
+    sed -i s_MODULENAME_"$modulename"_g content/index.xml
+
+    # create empty module css and js files
+    echo "/* module css */" > content/$modulename/mod.css
+    echo -e "function MODULENAME_sample() {\n  alert('Hi')\n}" > content/$modulename/mod.js
+
+    # correct link href and script src in xml/index.xml to use module name
+    sed -i s_MODULENAME_"$modulename"_g content/index.xml content/$modulename/mod.js
+
+}
+
+function jumpstart-book () {
+    echo -e "$(apt-cache policy doctemplate | grep Installed | sed s_\ \ Installed:\ __)" > doctemplate_version
+
+    cp -r $DATADIR/book-jumpstart/* .
+    cp -r $DATADIR/all/LINGUAS .
+    cp -r $DATADIR/all/README .
+
+}
+
+
+function mallard () {
+    echo -e "$(apt-cache policy doctemplate | grep Installed | sed s_\ \ Installed:\ __)" > doctemplate_version
+
+    cp -r $DATADIR/mallard/* .
+    cp -r $DATADIR/all/LINGUAS .
+    cp -r $DATADIR/all/README .
+
+    echo -e "\nYour Doctemplate mallard directory is set up."
+
+    echo -e "\nAll commands start with 'doctemplate_'"
+
+    . ./environment
+
+    #doctemplate_update_translations
+
+}
+
+function xml () {
+    echo -e "$(apt-cache policy doctemplate | grep Installed | sed s_\ \ Installed:\ __)" > doctemplate_version
+
+    cp -r $DATADIR/xml/* .
+    cp -r $DATADIR/all/LINGUAS .
+    cp -r $DATADIR/all/README .
+
+    echo -e "\nYour Doctemplate xml directory is set up."
+    echo -e "\nAll commands start with 'doctemplate_'"
+
+    #doctemplate_update_translations
+
+}
+
+
+case $1 in
+    article)
+        article
+        ;;
+    book)
+        book
+        ;;
+    jumpstart)
+        jumpstart
+        ;;
+    jumpstart-book)
+        jumpstart-book
+        ;;
+    mallard)
+        mallard
+        ;;
+    xml)
+        xml
+        ;;
+    *)
+        echo -e "\nUsage: doctemplate_create <type>, where types are: article, book, jumpstart, jumpstart-book, mallard, xml"
+esac
+
+echo -e "$(apt-cache policy doctemplate | grep Installed | sed s_\ \ Installed:\ __)" > doctemplate_version
+
+exit 0

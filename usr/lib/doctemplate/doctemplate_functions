@@ -1,0 +1,656 @@
+#!/bin/bash
+# This file is part of Doctemplate
+# Copyright (c) 2011 Kyle Nitzsche
+#                    Canonical
+#
+#This program is free software: you can redistribute it and/or modify it 
+#under the terms of the GNU General Public License version 3, as published 
+#by the Free Software Foundation.
+
+#This program is distributed in the hope that it will be useful, but 
+#WITHOUT ANY WARRANTY; without even the implied warranties of 
+#MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR 
+#PURPOSE.  See the GNU General Public License for more details.
+
+#You should have received a copy of the GNU General Public License along 
+#with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+lingua=$1
+FONT=$2
+
+. environment
+
+#Users creating pdfs may want to download the jar file from
+#http://sourceforge.net/projects/offo/
+#unzip it, and place the fop-hyph.jar in /usr/share/java
+#Without this, pdfs build, but there is no hyphenation and there are SEVERE
+#warnings in the output of Apache FOP
+
+export FOP_HYPHENATION_PATH=/usr/share/java/fop-hyph.jar
+
+DOCBOOKPARAMS_FILE=$CUSTOM/docbook-customization/DOCBOOKPARAMS
+DOCBOOKPARAMS=$(grep -v "^\#" $DOCBOOKPARAMS_FILE)
+HTMLPARAMS_FILE=$CUSTOM/html-customization/HTMLPARAMS
+HTMLPARAMS=$(grep -v "^\#" $HTMLPARAMS_FILE)
+HTMLSITEPARAMS_FILE=$CUSTOM/html-site-customization/HTMLSITEPARAMS
+HTMLSITEPARAMS=$(grep -v "^\#" $HTMLSITEPARAMS_FILE)
+HTMLXSL=$CUSTOM/html-site-customization/html-site.xsl
+HTMLXSLARTICLE=$CUSTOM/html-site-customization/html-site-article.xsl
+FOPARAMS_FILE=$CUSTOM/fop-customization/FOPARAMS
+if [ -f $CUSTOM/fop-customization/expand2db.xsl ]; then
+    EXPAND2DB=$CUSTOM/fop-customization/expand2db.xsl
+else
+    EXPAND2DB=/usr/share/doctemplate/xsl/expand2db.xsl
+fi
+export FOPARAMS=$(grep -v "^\#" $FOPARAMS_FILE)
+EPUBPARAMS_FILE=$CUSTOM/epub-customization/EPUBPARAMS
+EPUBPARAMS=$(grep -v "^\#" $EPUBPARAMS_FILE)
+EPUBXSL=$CUSTOM/epub-customization/epub-customization.xsl
+
+export LIB=/usr/share/doctemplate/lib
+export XSLLIB=/usr/share/doctemplate/xsl
+export XSLTPROC=/usr/bin/xsltproc
+export FOP=/usr/bin/fop
+XML2PO=/usr/bin/xml2po
+XMLLINT=/usr/bin/xmllint
+BASENAME=/usr/bin/basename
+DIRNAME=/usr/bin/dirname
+MSGMERGE=/usr/bin/msgmerge
+export BXML=build/xml/$lingua
+BHTML=build/html/$lingua
+JUMPSTART=build/jumpstart/$lingua
+BHTMLSITE=build/html-docbook/$lingua
+export BPDF=build/pdf/$lingua
+BEPUB=build/epub/$lingua
+BDOCBOOK=build/docbook/$lingua
+
+function localizeXmlImages () {
+    echo -e "$(basename $(pwd)): Localizing xml images"
+    if [ "content" == "jumpstart" ]; then 
+        source=content/$MODULE
+        target=$BXML/$MODULE
+    else
+        source=content
+        target=$BXML
+    fi
+    mkdir -p $target/images
+    if [ `ls -1 $source/images/ | wc -l` -gt 0 ]; then
+        #echo -e "\tCopying $source/images/ to $target"
+        cp -r $source/images/* $target/images
+    fi
+    if test -d $source/images-$lingua ; then
+        if [ `ls -1 $source/images-$lingua/ | wc -l` -gt 0 ]; then
+            #echo -e "\tCopying $source/images-$lingua/* to $target/images/"
+            cp $source/images-$lingua/* $target/images
+        fi
+    fi
+    return 0
+}
+
+function expand2docbook () {
+     xsltproc $FOPARAMS -o $BXML/db.xml $EXPAND2DB content/$DOC.xml
+}
+
+
+function localizeXml () {
+    echo -e "$(basename $(pwd)): Expand short hand to docbook"
+    expand2docbook
+    po_file=content/po/$lingua.po
+
+# phase1: xinclude transform it and set language
+    $XSLTPROC \
+        --xinclude \
+        --stringparam language $lingua \
+        -o $BXML/$DOC.phase1.xml \
+        $XSLLIB/set_lang.xsl\
+        $BXML/db.xml
+        f_po
+    $XML2PO -p $po_file -o $BXML/$DOC.index.xml $BXML/$DOC.phase1.xml
+    #profileXml
+}
+
+#function profileXml () {
+#
+#
+#
+#}
+
+
+function localizeMallard () {
+
+    BMALLARD="build/mallard/$lingua"
+    mkdir -p $BMALLARD
+    echo -e "Localizing mallard into $BMALLARD"
+    cp -r $BXML/* $BMALLARD
+
+    po_file=content/po/$lingua.po
+
+    pages=$(ls content | grep "\.page")
+    
+echo "pages: $pages"
+    for page in $pages;
+    do
+
+# phase1: set root element's xml-lang attribute
+        echo -e "\tSet lang attribute. Generating $BMALLARD/$page.$lingua."
+        $XSLTPROC \
+            --stringparam language $lingua \
+            -o $BMALLARD/$page.$lingua \
+            $XSLLIB/set_lang_xml.xsl\
+            content/$page
+
+        if test -f $po_file ; then
+# use po to translate or mv untranslated phase1 to lang-specific xml \
+            echo -e "\t$po_file exists. Translate with it to generate $BMALLARD/$page"
+            $XML2PO -p $po_file -o $BMALLARD/$page $BMALLARD/$page.$lingua
+        else
+            echo -e "\t$po_file not found. Copy $BMALLARD/$page.$lingua $BMALLARD/$page"
+# Using untranslated ; \
+            cp content/$page $BMALLARD/$page
+        fi
+        rm -f $BMALLARD/$page.$lingua
+    done
+}
+
+function f_mallard  () {
+    localizeXmlImages
+    localizeMallard
+}
+
+function f_xml () {
+    localizeXmlImages
+    localizeXml
+}
+
+function f_jumpstart () {
+    echo -e "Localizing jumpstart module for $(basename $(pwd)) in: $lingua"
+    f_xml
+    cp $BXML/index.index.xml $BXML/index.xml
+    mkdir -p $JUMPSTART/$MODULE/
+    echo -e "\tCopying $BXML/images/ to $JUMPSTART/$MODULE, if any"
+    cp -r $BXML/images/ $JUMPSTART/$MODULE/
+    echo -e "\tAdd doctype"
+    xsltproc -o $JUMPSTART/index.xml.doctype /usr/share/doctemplate/xsl/add_doctype.xsl $BXML/index.xml
+    echo -e "\tConverting $JUMPSTART/$DOC.xml.doctype to $JUMPSTART/index.html"
+    $LIB/dt_xml2jumpstart $JUMPSTART/$DOC.xml.doctype > $JUMPSTART/index.html
+    echo -e "\tCopying files from $CUSTOM/jumpstart-customization into $JUMPSTART/$MODULE/"
+    cp -r $CUSTOM/jumpstart-customization/* $JUMPSTART/
+    echo -e "\tCopying (book) files from $CUSTOM/jumpstart-customization into $JUMPSTART/$MODULE/"
+    cp -r $CUSTOM/jumpstart-customization/book* $JUMPSTART/
+    if [ $( ls -1 content/$MODULE/ | wc -l) -gt 0 ]; then
+        items=$(ls -1 content/$MODULE)
+        for item in $items
+        do
+            thefile=$(basename $item)
+            if [[ "$thefile" != images* ]]; then
+                echo -e "\tCopying module asset files from content/$MODULE/* $JUMPSTART/$MODULE/"
+                cp content/$MODULE/$thefile $JUMPSTART/$MODULE
+            fi
+        done
+    fi
+    #removethese="$JUMPSTART/$DOC.xml.doctype $BXML/index.index.xml"
+    #echo -e "\tDelete build artifact files: $removethese"
+    #for remove in $removethese
+    #do
+    #    rm -f $remove
+    #done
+}
+
+function f_jumpstart-book () {
+    echo -e "Localizing jumpstart book for $(basename $(pwd)) in: $lingua"
+    f_xml
+# setup/create localized build dir for generated outputs
+    BUILDLOC=build/jumpstart/$lingua
+    mkdir -p $BUILDLOC
+
+# get the list of (non-commented) modules from 'modules' file
+    MODULES=$(cat modules | grep -v "^#")
+
+# for each module, get and use its localized content and module-specific assets
+    divs=""
+    links=""
+    for mod in $MODULES
+    do
+        linksmod=""
+
+# generate-update-localize jumpstart module
+        echo -e "\nJUMPSTART-BOOK: Generating fresh localized jumpstart for MODULE $mod LINGUA $lingua"
+        cur=$(pwd)
+        cd $mod
+        . environment
+        doctemplate_make jumpstart 2>&1>/dev/null
+        cd $cur
+
+# obtain jumpstart module's content div and append to $divs
+        echo -e "\nJUMPSTART-BOOK:"
+        echo -e "\tGetting module content for $mod in $lingua"
+        MODLOCDIR="$mod/build/xml/$lingua"
+        MODLOCHMTL5DIR="$mod/build/jumpstart/$lingua"
+        MODLOCDIRMODULE="$mod/build/$TYPE/$lingua/$MODULE"
+        modbasename=$(basename $mod)
+        divs=${divs}$(xsltproc ./lib/get_module_div.xsl $MODLOCDIR/$DOC.xml)
+
+# set module <link> hrefs and <script> srcs with corrected path to module
+        links=$links$(xsltproc ./lib/get_module_head_links.xsl $MODLOCDIR/$DOC.xml)
+
+        . ./environment
+
+# TODO: BOOKFILE needs to be localized first
+        BOOKLOCXML=$(cat $BXML/$DOC.index.xml)
+
+# in book.xml file, replace "modulesReplacementTarget" with the divs 
+# retrieved previously, and same for linksReplacementTarget
+        #echo "BOOKLOCXML: $BOOKLOCXML"
+        INDEX1=${BOOKLOCXML/<modulesReplacementTarget\/>/${divs}}
+        INDEX=${INDEX1/<linksReplacementTarget\/>/${links}}
+
+# copy localized module assets over
+        cp -r $MODLOCDIRMODULE $BUILDLOC/
+
+        jumpstartcustom="../customization/jumpstart-customization"
+
+# get book js and css assets from $jumpstartcustom/book*
+        if [ ! -d "$jumpstartcustom" ]; then
+            echo -e "Error: $htmlcustom does not exist. Stopping."
+            exit 1
+        fi
+
+# get jsquery
+        cp /usr/share/javascript/jquery/jquery.js $BUILDLOC/
+
+# get book*
+        cp $jumpstartcustom/book.* $BUILDLOC/
+
+    done
+
+# write the book.xml file with the modules' localized content to 
+# the book's localized build dir
+    echo -e "$INDEX" > $BUILDLOC/index.phase1.xml
+    echo -e "\tAdd doctype"
+
+# remove the special html comment to revela the doctype
+    sed s_\<!--killme__g $BUILDLOC/index.phase1.xml > $BUILDLOC/index.phase2.xml
+    sed s_killme--\>__g $BUILDLOC/index.phase2.xml > $BUILDLOC/index.html
+
+# copy the localized book images dir into the localized build/jumpstart/<locale>/ dir
+    #echo "BOOKXML: $BOOKXML"
+    cp -r build/xml/$lingua/images $BUILDLOC
+
+# delete *phase* intermediate generated files
+    rm -r $BUILDLOC/*phase*
+
+}
+
+function f_docbook () {
+    f_xml
+    mkdir -p $BDOCBOOK
+    echo -e "$(basename $(pwd)): Localizing docbook images"
+    cp -r $BXML/images $BDOCBOOK
+    echo -e "$(basename $(pwd)): Profiling docbook content"
+    echo -e "DOCBOOKPARAMS: $DOCBOOKPARAMS"
+    $XSLTPROC \
+        $DOCBOOKPARAMS \
+        -o $BDOCBOOK/$DOC.profile.xml \
+        /usr/share/xml/docbook/stylesheet/docbook-xsl/profiling/profile.xsl \
+        $BXML/$DOC.index.xml
+    echo -e "$(basename $(pwd)): Generating docbook content"
+    # if DOCBOOKPARAMS contains "showvcsrev yes " and build/vcsrev exists, add param with
+    # vcs rev from that file to xslt. Your customization layer may use that, for
+    # example adding it to a <releaseinfo> element and displaying that appropriately.
+    # Note: this functionality depends on some external mechanism placing the
+    # vcs revision in build/vcsrev, for example a wrapper build script that itself
+    # calls doctemplate_make
+    echo $(pwd)
+    grep -q "showvcsrev yes" $CUSTOM/docbook-customization/DOCBOOKPARAMS
+    if [ $? -eq 0 ]; then
+      VCSREVFILE="./build/vcsrev"
+      if [ -f $BZRREVFILE ]; then
+        DOCBOOKPARAMS="$DOCBOOKPARAMS --stringparam vcsrev $(cat $VCSREVFILE)"
+      fi
+    fi
+    echo "DOCBOOKPARAMS: $DOCBOOKPARAMS"
+    $XSLTPROC \
+        $DOCBOOKPARAMS \
+        -o $BDOCBOOK/$DOC.xml \
+        $CUSTOM/docbook-customization/docbook-customization.xsl \
+        $BDOCBOOK/$DOC.profile.xml
+    return 0
+}
+
+
+function f_html () {
+    f_docbook
+    mkdir -p $BHTML
+    echo -e "$(basename $(pwd)): Localizing html image"
+    cp -r $BXML/images $BHTML
+    echo -e "$(basename $(pwd)): Adding $LIB/html-images/"
+    if [ $(ls $LIB/html-images/) > 0 ]; then
+       cp $LIB/html-images/* $BHTML/images
+    fi
+    echo -e "$(basename $(pwd)): Copying html-customization/javascript.xml into place."
+    cp $CUSTOM/html-customization/javascript.xml $BHTML/
+    #echo -e "\tXIncluding on root DOC: $BDOCBOOK/$DOC.xml."
+    echo -e "$(basename $(pwd)): Generating: $BHTML/phase-xinclude.html with $HTMLPARAMS"
+    $XSLTPROC --xinclude \
+        -o $BHTML/phase-xinclude.xml \
+        $XSLLIB/xinclude.xsl \
+        $BDOCBOOK/$DOC.xml
+    echo -e "$(basename $(pwd)): Generating $BHTML/index.html"
+    $XSLTPROC \
+        $HTMLPARAMS \
+        --stringparam custom $CUSTOM \
+        -o $BHTML/index.html \
+        $CUSTOM/html-customization/html-customization.xsl \
+        $BHTML/phase-xinclude.xml
+    cp $CUSTOM/html-customization/style.css $BHTML/
+    cp /usr/share/javascript/jquery/jquery.js $BHTML
+    rm  $BHTML/*phase*
+    return 0
+
+}
+
+function f_htmlsite () {
+    f_docbook
+    echo -e "$(basename $(pwd)): Localizing html-docbook"
+    mkdir -p $BHTMLSITE
+    echo -e "$(basename $(pwd)): Copying $BXML/images to $BHTMLSITE, if any"
+    if [ $(ls $BXML/images) > 0 ]; then
+        cp -r $BXML/images $BHTMLSITE
+    fi
+    echo -e "$(basename $(pwd)): Copying html-site-customization/images into place, if any"
+    if [ $(ls $CUSTOM/html-site-customization/images/) > 0 ]; then
+        cp $CUSTOM/html-site-customization/images/* $BHTMLSITE/images/
+    fi
+    echo -e "$(basename $(pwd)): Copying html-customization/javascript.xml into place."
+    cp $CUSTOM/html-site-customization/javascript.xml $BHTMLSITE
+    echo -e "$(basename $(pwd)): XInclude on root DOC: $BDOCBOOK/$DOC.xml."
+    echo -e "$(basename $(pwd)): And generating: $BHTMLSITE/phase-xinclude.html"
+    $XSLTPROC --xinclude \
+        -o $BHTMLSITE/phase-xinclude.html \
+        $XSLLIB/xinclude.xsl \
+        $BDOCBOOK/$DOC.xml
+    echo -e "$(basename $(pwd)): Generating: $BHTMLSITE/index.html"
+    $XSLTPROC --xinclude \
+        $HTMLSITEPARAMS \
+        -o $BHTMLSITE/index.html \
+        $HTMLXSLARTICLE \
+        $BHTMLSITE/phase-xinclude.html
+    cp $CUSTOM/html-site-customization/style.css $BHTMLSITE
+    cp /usr/share/javascript/jquery/jquery.js $BHTMLSITE
+    rm  $BHTMLSITE/*phase*
+}
+
+
+function f_pdf () {
+    f_docbook
+    echo -e "$(basename $(pwd)): Localizing article pdf"
+    mkdir -p $BPDF
+    #echo -e $FOP_HYPHENATION_PATH
+    echo -e "$(basename $(pwd)): Copying localized docbook to $BPDF"
+    cp -r $BDOCBOOK/* $BPDF
+    cp -r $BXML/images $BPDF
+    cd $BPDF
+    echo -e "$(basename $(pwd)): Creating $BPDF/$DOC.fo file from localized DOCbook with stylsheet parameters in FOPARAMS file and in fop-customization.xsl:"
+    $XSLTPROC --xinclude \
+        $FOPARAMS \
+        -o $BPDF/$DOC.fo \
+        ../../../$CUSTOM/fop-customization/fop-customization.xsl \
+        $DOC.xml
+    #comment this in to drop generated .fo in project root dir for debug
+    #cp $BPDF/$DOC.fo ../../../$DOC.fo
+    echo -e "$(basename $(pwd)): Creating $BPDF/$DOC.pdf file"
+    echo -e "$(basename $(pwd)): APACHE FOP OUTPUT:"
+    #echo "FONT: $FONT"
+    $FOP -c ../../../$CUSTOM/fop-customization/apache/$FONT.conf -fo $BPDF/$DOC.fo -pdf $DOC.pdf
+    cd ../../..
+}
+
+function f_book-docbook () {
+    echo -e "$(basename $(pwd)): Localizing book docbook"
+
+    . ./environment
+
+    f_xml
+
+# create build/ if needed for generated outout
+    BXML=build/xml/$lingua
+    BPDF=build/pdf/$lingua
+    mkdir -p $BPDF
+    mkdir -p $BDOCBOOK
+
+# needed localized vars
+    LOCXML=$BXML/loc.xml
+    FO=$BPDF/book.fo
+    TRANSXML=$BXML/trans.xml
+
+# create/update needed po files
+    #f_po
+
+# apply po file to generate translated xml file with
+# lang attribute in root element
+    echo -e "$(basename $(pwd)): Creating localized xml for book."
+    xml2po -p content/po/$lingua.po -o $TRANSXML content/$DOC.xml
+
+# create xml file (build/tmp/xincludes) that is the set of <xi:include.../> 
+# lines that include each module's (article's) localized xml file
+    modules=$(grep -v "^\#" ./modules)
+
+    #echo $modules
+    lines="<?xml version=\"1.0\" ?>\n<root  xmlns:xi=\"http://www.w3.org/2001/XInclude\">\n"
+#lines=""
+    for mod in $modules
+    do
+        if [ ! -e "${mod}/environment" ]; then
+            echo "ERROR: $mod/environment does not exist and it must. Stopping."
+            exit 1
+        fi
+        . $mod/environment
+
+# get the localized module docbook
+        lines="${lines}<xi:include href=\"../../../$mod/build/docbook/$lingua/$DOC.xml\"/>\\n"
+
+# copy module localized images, if any to our localized xml
+        if [ $(ls $mod/build/xml/${lingua}/images/ | wc -w ) > 0 ]; then
+            echo "$(basename $(pwd)): Copying localized module $mod xml images into book xml"
+            [ -f "$mod/build/xml/${lingua}/images/*" ] && \
+                cp $mod/build/xml/${lingua}/images/* $BXML/images
+        fi
+    done
+    . ./environment
+
+    lines="${lines}</root>"
+
+# ouput the xml file with the xincludes to a directory that is in the correct
+# *relative* position so that that the localized xincludes will be on target
+    mkdir -p build/tmp/tmp
+    echo -e $lines > build/tmp/tmp/xincludes.xml
+
+# create xml file that includes the xincludes for articles:
+     xsltproc --xinclude \
+        -o $BXML/$DOC-xincludes.xml \
+        lib/localized.xsl content/$DOC.xml \
+        $BXML/trans.xml
+
+# copy xml to docbook and make required changes
+    cp -r $BXML/images $BDOCBOOK
+    cp $BXML/$DOC-xincludes.xml $BDOCBOOK/$DOC.base.xml
+    echo -e "$(basename $(pwd)): Profiling docbook content"
+    echo -e "DOCBOOKPARAMS: $DOCBOOKPARAMS"
+    $XSLTPROC \
+        $DOCBOOKPARAMS \
+        -o $BDOCBOOK/$DOC.xml \
+        /usr/share/xml/docbook/stylesheet/docbook-xsl/profiling/profile.xsl \
+        $BDOCBOOK/$DOC.base.xml
+#if present, run customization layer script named in environment file
+    if [ -f $CUSTOM/docbook-customization/$DBSCRIPT ]; then
+      $CUSTOM/docbook-customization/$DBSCRIPT $CUSTOM $BDOCBOOK $DOC
+    fi
+
+}
+
+function f_book-html () {
+    f_book-docbook
+    echo -e "$(basename $(pwd)): Localizing book html"
+    echo -e "$(basename $(pwd)): Copying $BXML/images to $BHTML"
+    mkdir -p $BHTML
+    cp -r $BXML/images $BHTML
+    echo -e "$(basename $(pwd)): Copying $CUSTOM/html-customization/javascript.xml to $BDOCBOOK."
+    cp $CUSTOM/html-site-customization/javascript.xml $BDOCBOOK
+    $XSLTPROC \
+        $HTMLSITEPARAMS \
+        -o $BHTML/index.html \
+        $CUSTOM/html-site-customization/html-site.xsl \
+        $BDOCBOOK/$DOC.xml
+    cp $CUSTOM/html-site-customization/style.css $BHTML
+    cp /usr/share/javascript/jquery/jquery.js $BHTML
+}
+
+function f_book-epub () {
+    #. ./environment
+    f_book-docbook
+    echo -e "$(basename $(pwd)): Localizing book epub"
+    mkdir -p $BEPUB/OEBPS
+    cp -r $BDOCBOOK/* $BEPUB
+    if [ -d $BEPUB/OEBPS/images ]; then rm -rf $BEPUB/OEBPS/images; fi
+    mv $BEPUB/images $BEPUB/OEBPS/
+    $XSLTPROC \
+        $EPUBPARAMS \
+        -o $BEPUB/index.html \
+        $EPUBXSL \
+        $BDOCBOOK/$DOC.xml
+    cp $CUSTOM/epub-customization/styles.css $BEPUB/OEBPS
+    echo -e "$(basename $(pwd)): Creating $BEPUB/mimetype"
+    echo "application/epub+zip" > $BEPUB/mimetype
+    rm $BEPUB/index.html
+    rm $BEPUB/$DOC.xml
+}
+
+function f_book-html-docbook () {
+    f_book-docbook
+    echo -e "$(basename $(pwd)): Localizing book html"
+    mkdir -p $BHTMLSITE
+    cp -r $BDOCBOOK/images $BHTMLSITE
+    if [ $(ls $CUSTOM/html-site-customization/images/ | wc -w ) > 0 ]; then
+        cp -r $CUSTOM/html-site-customization/images/* $BHTMLSITE/images
+    fi
+    $XSLTPROC \
+        $HTMLPARAMS \
+        -o $BHTMLSITE/index.html \
+        $HTMLXSL \
+        $BDOCBOOK/$DOC.xml
+    cp $CUSTOM/html-site-customization/style.css $BHTMLSITE/
+
+}
+
+function f_book-pdf () {
+    f_book-docbook
+    echo -e "$(basename $(pwd)): Localizing book"
+
+# copy localized docbook images to pdf dir
+    cp -r $BDOCBOOK/images $BPDF
+
+# make the fo object
+    echo -e "$(basename $(pwd)): Creating the fo file:."
+    xsltproc \
+        -o $BPDF/book.fo \
+        $FOPARAMS \
+        --stringparam lang $lingua \
+        $CUSTOM/fop-customization/fop-customization.xsl \
+        $BDOCBOOK/$DOC.xml
+
+# generate localized book, fo, and finally pdf for each lingua
+    echo -e "$(basename $(pwd)): Making font selections for each language."
+    if [ -e ./dt_fontconfig ] ; then
+        . ./dt_fontconfig $lingua
+        MESSAGE=user
+    elif [ -e $CUSTOM/fop-customization/dt_fontconfig ] ; then
+        . $CUSTOM/fop-customization/dt_fontconfig $lingua
+        MESSAGE=customization
+    else
+        . $LIB/dt_fontconfig $lingua
+        MESSAGE=default
+    fi
+    dt_fontconfig
+
+    echo -e "\tFor $lingua, use $MESSAGE configuration to select font: $FONT";
+
+# make the pdf
+    echo -e "$(basename $(pwd)): Creating the PDF."
+    . ./environment
+    echo -e "$(basename $(pwd)): ===APACHE FOP OUTPUT==="
+    cd $BPDF
+    fop \
+        -c ../../../$CUSTOM/fop-customization/apache/$FONT.conf \
+        -fo book.fo \
+        -pdf $DOC.pdf
+    cd ../../..
+}
+
+function f_epub () {
+    f_docbook
+    echo -e "$(basename $(pwd)): Localizing epub for $(basename $(pwd)) in: $lingua"
+
+    mkdir -p $BEPUB
+    echo -e "\tCopying $BXML/images to $BEPUB/OEBPS"
+    if [ ! -d $BEPUB/OEBPS ]; then \
+        mkdir $BEPUB/OEBPS; \
+    fi;
+    if [ -d $BEPUB/OEBPS/images ]; then \
+        rm $ -rf $BEPUB/OEBPS/images; \
+    fi;
+    mv $BXML/images $BEPUB/OEBPS
+    echo -e "\tXIncluding on root DOC $BDOCBOOK/$DOC.xml: generating: $BEPUB/index-xinclude.html"
+    $XSLTPROC --xinclude \
+        -o $BEPUB/phase-xinclude.xml \
+        $XSLLIB/xinclude.xsl \
+        $BDOCBOOK/$DOC.xml
+    echo -e "\tConverting to html with parameters in $EPUBPARAMS_FILE file.i"
+    echo -e "\tAnd generating $BEPUB/phase-html.html"
+    echo -e "\tCustomizing epub with epub-customization/epub-html-customization.xsl."
+    echo -e "\tAnd Generating $BEPUB/index.html"
+    $XSLTPROC \
+        $EPUBPARAMS \
+        -o $BEPUB/index.html \
+        $EPUBXSL \
+        $BEPUB/phase-xinclude.xml
+    cp $CUSTOM/epub-customization/styles.css $BEPUB/OEBPS
+    echo "application/epub+zip" > $BEPUB/mimetype
+    rm $BEPUB/index.html
+    rm  $BEPUB/*phase*
+}
+
+function f_pot () {
+    echo -e "$(basename $(pwd)): Generating POT"
+    . ./environment
+    if [ "$TYPE" == "mallard" ];
+    then
+        pages=$(find content/ -name "*.page")
+        $XML2PO \
+            -o content/po/$DOC.pot \
+            $pages
+    else
+        cd content
+        $XSLTPROC \
+            --xinclude \
+            -o $DOC-xincludes.xml \
+            $XSLLIB/xinclude.xsl \
+            $DOC.xml
+            $XML2PO -e \
+                -o po/$DOC.pot \
+                $DOC-xincludes.xml
+        rm $DOC-xincludes.xml
+        cd ..
+    fi
+}
+
+function f_po () {
+    pofile="content/po/$lingua.po"
+    if ! test -f $pofile ; then
+        echo -e "$(basename $(pwd)): Making $pofile"
+        cd content/po; msginit -l $lingua -i $DOC.pot --no-translator; cd ../..
+    else
+        echo -e "$(basename $(pwd)): Updating $pofile"
+        $MSGMERGE -U $pofile content/po/$DOC.pot
+    fi
+}
+

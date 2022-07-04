@@ -1,0 +1,15 @@
+Makefile.in
+Makefile
+debian/doctemplate
+debian/doctemplate/DEBIAN
+debian/doctemplate/usr
+debian/doctemplate.debhelper.log
+debian/doctemplate.substvars
+debian/files
+aclocal.m4
+config.log
+config.status
+configure
+install-sh
+missing
+*debhelper

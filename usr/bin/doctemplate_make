@@ -1,0 +1,426 @@
+#!/bin/bash
+
+# This file is part of Doctemplate
+# Copyright (c) 2011 Kyle Nitzsche
+#                    Canonical
+#
+#This program is free software: you can redistribute it and/or modify it 
+#under the terms of the GNU General Public License version 3, as published 
+#by the Free Software Foundation.
+
+#This program is distributed in the hope that it will be useful, but 
+#WITHOUT ANY WARRANTY; without even the implied warranties of 
+#MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR 
+#PURPOSE.  See the GNU General Public License for more details.
+
+#You should have received a copy of the GNU General Public License along 
+#with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+. ./environment
+
+# verify source content xml is valid xml or exit
+xmllint --xinclude --noout content/$DOC.xml || exit 1
+
+FUNCTIONS=/usr/lib/doctemplate/doctemplate_functions
+
+# if environment file contains 'DEFAULT_BUILD' field, use it
+if [ -n "${DEFAULT_BUILD}" ]; then
+    BUILDTYPE=$DEFAULT_BUILD
+fi
+
+#BUILDTYPE is the build type
+if [ -n "$1" ]; then
+    BUILDTYPE=$1
+fi
+
+#export REV=$(bzr log -l 1 | grep revno| sed s_revno:\ __)
+#echo $REV
+
+# if $2 is present and it is not 'draft', treat it as a path to a LINGUAS file and use it
+if [ $2 ] && [ "$2" != "draft" ] ; then
+    export LINGUAS_FILE=$2
+else
+    export LINGUAS_FILE=LINGUAS
+fi
+
+export LINGUAS=$(if test -r $LINGUAS_FILE; then grep -v "^\#" $LINGUAS_FILE; fi)
+echo "LINGUAS: $LINGUAS"
+
+# if $2 or $3 is draft, build the pdf with in draft style
+if [ "$2" == "draft" ] || [ "$3" == "draft" ]; then
+    export DRAFT=yes
+else
+    export DRAFT=no
+fi
+
+function pot () {
+    . $FUNCTIONS
+    if [ ! -d content/po ]; then
+        mkdir content/po
+    fi
+    if [ -d po ]; then
+        if [ $(ls po/ | wc -l ) -gt 0 ]; then
+            cp -r po/* content/po/
+        fi
+    fi
+    f_pot $lingua
+}
+
+function xml () {
+    pot
+    echo -e "\nMAKING LOCALIZED XML"
+    for lingua in $LINGUAS
+    do
+        echo -e "\nLANGUAGE: $lingua"
+        . $FUNCTIONS $lingua
+        f_xml
+    done
+}
+
+function html () {
+    pot
+    echo -e "\nMAKING LOCALIZED HTML"
+
+    for lingua in $LINGUAS
+    do
+        echo -e "LANGUAGE: $lingua"
+        . $FUNCTIONS $lingua
+        f_html
+    done
+}
+
+function html-docbook () {
+    pot
+    echo -e "\nMAKING LOCALIZED HTML, DOCBOOK STYLE"
+
+    for lingua in $LINGUAS
+    do
+        echo -e "LANGUAGE: $lingua"
+        . $FUNCTIONS $lingua
+        f_htmlsite
+    done
+}
+
+function docbook () {
+    pot
+    echo -e "\nMAKING LOCALIZED DOCBOOK"
+
+    for lingua in $LINGUAS
+    do
+        echo -e "LANGUAGE: $lingua"
+        . $FUNCTIONS $lingua
+        f_docbook
+    done
+}
+
+function pdf () {
+    pot
+    echo -e "\nMAKING LOCALIZED ARTICLE PDFs"
+    for lingua in $LINGUAS
+    do
+        if [ -e ./dt_fontconfig ] ; then
+            . ./dt_fontconfig $lingua
+            MESSAGE=user
+        elif [ -e $CUSTOM/fop-customization/dt_fontconfig ] ; then
+            . $CUSTOM/fop-customization/dt_fontconfig $lingua
+            MESSAGE=customization
+        else
+            . /usr/share/doctemplate/lib/dt_fontconfig/dt_fontconfig $lingua
+            MESSAGE=default
+        fi
+        echo -e "For $lingua, use $MESSAGE configuration to select font: $FONT";
+        dt_fontconfig
+        . $FUNCTIONS $lingua $FONT
+        f_pdf
+    done
+}
+
+function book-docbook () {
+    pot
+    echo -e "\nMAKING LOCALIZED BOOK DOCBOOK"
+    get-modules
+
+    home=$(pwd)
+    for lingua in $LINGUAS
+    do
+        echo -e "\nLANGUAGE: $lingua";
+        for mod in $mods
+        do
+            cd $mod
+            . $FUNCTIONS $lingua
+            f_pot
+            f_docbook
+            cd $home
+            echo -e "$(basename $(pwd)): Moving module docbook images to book"
+            mkdir -p build/docbook/$lingua/images
+            [ -f "$mod/build/docbook/$lingua/images/*" ] && \
+                cp r -$mod/build/docbook/$lingua/images/* build/docbook/$lingua/images
+        done
+        . $FUNCTIONS $lingua
+        f_book-docbook
+    done
+}
+
+function get-modules () {
+    export mods=$(grep -v "^#" modules)
+    if [ ${#mods} == 0 ]; then
+        echo -e "\nError: your ./modules file is empty but book projects must have modules. Stopping.\n"
+        exit 1
+    fi
+}
+
+function book-epub () {
+    pot
+    home=$(pwd)
+    get-modules
+    echo -e "\nMAKING LOCALIZED BOOK EPUB"
+    for lingua in $LINGUAS
+    do
+        echo -e "LANGUAGE: $lingua";
+        for mod in $mods
+        do
+            cd $mod
+            #echo -e "\nLOCALIZE $mod docbook FOR LANGUAGE: $lingua";
+            . $FUNCTIONS $lingua
+            f_pot
+            f_docbook
+            cd $home
+            echo -e "Localized docbook images to book"
+            mkdir -p build/docbook/$lingua/images
+            [ -f "$mod/build/docbook/$lingua/images/*" ] && \
+                cp -r $mod/build/docbook/$lingua/images/* build/docbook/$lingua/images
+        done
+
+        . $FUNCTIONS $lingua
+        f_book-epub
+    done
+}
+
+function book-html () {
+    echo -e "\nMAKING LOCALIZED BOOK HTML-DEV"
+    for lingua in $LINGUAS
+    do
+        echo -e "LANGUAGE: $lingua";
+        . $FUNCTIONS $lingua
+        f_book-html
+    done
+}
+
+function book-html-docbook () {
+    pot
+    home=$(pwd)
+    get-modules
+    echo -e "\nMAKING LOCALIZED BOOK HTML DOCBOOK STYLE"
+    for lingua in $LINGUAS
+    do
+        echo -e "LANGUAGE: $lingua";
+        for mod in $mods
+        do
+            cd $mod
+            echo -e "\nLOCALIZE $mod docbook for: $lingua";
+            . $FUNCTIONS $lingua
+            f_pot
+            f_docbook
+            cd $home
+            echo -e "Localized module docbook images to book"
+            mkdir -p build/docbook/$lingua/images
+            [ -f "$mod/build/docbook/$lingua/images/*" ] && \
+                cp -r $mod/build/docbook/$lingua/images/* build/docbook/$lingua/images
+        done
+        . $FUNCTIONS $lingua
+        f_book-html-docbook
+    done
+}
+
+
+function book-pdf () {
+    pot
+    echo -e "\nMAKING LOCALIZED BOOK PDFs"
+    export BOOKLIB=lib/
+    export BOOKXML=content/book.xml
+    get-modules
+
+    echo -e "MODULES: $mods"
+
+# if there are redundant id attributes among all articles,
+# report them and quit
+    echo -e "CHECKING for duplicate id attributes among articles."
+
+    dup_ids=( $(python /usr/share/doctemplate/lib/get_dup_ids.py \
+    $ARTICLES) )
+
+    if [ ${#dup_ids[@]} -gt 1 ] ; then
+        echo -e "\nError: The following id attributes among all your articles are not unique,"
+        echo -e "a docbook error. These must be corrected:"
+        echo -e "\n${dup_ids[@]}"
+
+        for (( j=0; j<${#dup_ids[@]}; j++ ))
+        do
+            att=${dup_ids[$j]}
+            echo -e "\nid=\"${att}\" is found in the following:"
+            for (( i=0; i<${#mods[@]}; i++ ))
+            do
+                art="${mods[$i]}/article"
+                grep -rl "$att" $art | grep -v "${art}/po/"
+            done
+        done
+
+        echo -e "\nStopping"
+        exit 1
+    fi
+
+#export FOP_HYPHENATION_PATH=/usr/share/java/fop-hyph.jar
+
+#make each pdf for each lingua
+    home=$(pwd)
+    for lingua in $LINGUAS
+    do
+        echo -e "LANGUAGE: $lingua";
+        for mod in $mods
+        do
+            cd $mod
+            #echo -e "\nLOCALIZE $mod docbook FOR LANGUAGE: $lingua";
+            . $FUNCTIONS $lingua
+            f_pot
+            f_docbook
+            cd $home
+            echo -e "Localized module docbook images to book"
+            mkdir -p build/docbook/$lingua/images
+            [ -f "$mod/build/docbook/$lingua/images/*" ] && \
+                cp -r $mod/build/docbook/$lingua/images/* build/docbook/$lingua/images
+        done
+        . $FUNCTIONS $lingua
+        f_book-pdf
+    done
+}
+
+function jumpstart () {
+    pot
+    echo -e "\nMAKING LOCALIZED JUMPSTART"
+    for lingua in $LINGUAS
+    do
+        echo -e "LANGUAGE: $lingua"
+        . $FUNCTIONS $lingua
+        f_jumpstart
+    done
+}
+
+
+function jumpstart-book () {
+    pot
+    echo -e "\nMAKING LOCALIZED JUMPSTART-BOOK"
+    for lingua in $LINGUAS
+    do
+        echo -e "LANGUAGE: $lingua"
+        . $FUNCTIONS $lingua
+        f_jumpstart-book
+    done
+}
+
+function epub () {
+    pot
+    echo -e "\nMAKING LOCALIZED EPUB"
+    for lingua in $LINGUAS
+    do
+        . $FUNCTIONS $lingua
+        echo -e "LANGUAGE: $lingua"
+        f_epub
+    done
+}
+
+
+function mallard () {
+    echo -e "\nMAKING LOCALIZED MALLARD"
+    for lingua in $LINGUAS
+    do
+        echo -e "\nLANGUAGE: $lingua"
+        . $FUNCTIONS $lingua
+        f_mallard
+    done
+}
+
+# Is the build type specified as the first command line argument
+#if [ -z ${1} ]; then
+#    echo "Error: Required build type argument is missing. Stopping"
+#    exit 1
+#fi
+
+
+# Does the pwd contain an ./environment file?
+if [ ! -e ./environment ]; then
+    echo "Error: this is not a valid Doctemplate directory because there is no ./environment file. Stopping"
+    exit 1
+fi
+
+# get (installed) doctemplate's current set of valid project types
+# and verify the ./environment TYPE var is supported, else quit
+PROJECTTYPES=( $( grep -v ^# "/usr/share/doctemplate/build-types/projects" | sed ':a;N;$!ba;s/\n/ /g') )
+FOUND=1
+for (( j=0; j<${#PROJECTTYPES[@]}; j++ ))
+do
+    type="${PROJECTTYPES[$j]}"
+    if [ "$TYPE" == "$type" ]; then
+        FOUND=0
+    fi
+done
+if [ ! "$FOUND" -eq 0 ]; then
+    echo "Error: Your project's ./environment file defines an invalid project TYPE. Stopping"
+    echo -e "Valid types are:\n$(cat /usr/share/doctemplate/build-types/projects)"
+    exit 1
+fi
+
+# Get (installed) doctemplate's supported build/output types for the current
+# project type, and verify the single command line arg ($BUILDTYPE) is valid
+# else quit
+BUILDTYPES=( $( grep -v ^# "/usr/share/doctemplate/build-types/$TYPE" | sed ':a;N;$!ba;s/\n/ /g') )
+FOUND=1
+for (( j=0; j<${#BUILDTYPES[@]}; j++ ))
+do
+    type="${BUILDTYPES[$j]}"
+    #echo "type: $type"
+    if [ "$BUILDTYPE" == "$type" ]; then
+        FOUND=0
+    fi
+done
+if [ ! "$FOUND" -eq 0 ]; then
+    echo -e "\nUsage: doctemplate_make <build type>"
+    echo -e "\nValid build type arguments for this project (a project of type: $TYPE) are:\n$(cat /usr/share/doctemplate/build-types/$TYPE)"
+    exit 1
+fi
+
+# connect passed arg with the proper function for the $TYPE
+case $TYPE in
+        "book")
+            case $BUILDTYPE in
+                "docbook")
+                    book-docbook
+                    ;;
+                "html")
+                    book-html
+                    ;;
+                "html-docbook")
+                    book-html-docbook
+                    ;;
+                "pdf")
+                    book-pdf
+                    ;;
+                "epub")
+                    book-epub
+                    ;;
+            esac
+            ;;
+        article)
+            $BUILDTYPE
+            ;;
+        jumpstart)
+            $BUILDTYPE
+            ;;
+        jumpstart-book)
+            jumpstart-book
+            ;;
+        mallard)
+            $BUILDTYPE
+            ;;
+esac
+
+exit 0

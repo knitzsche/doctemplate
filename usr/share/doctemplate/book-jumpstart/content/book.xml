@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--killme
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+killme-->
+
+<html>
+<head>
+    <title>My Modular Book</title>
+    <link rel="stylesheet" href="book.css" type="text/css"/>
+    <script type="text/javascript" src="book-jquery-1.5.1.min.js"> </script>
+    <script type="text/javascript" src="book.js"> </script>
+
+<linksReplacementTarget/>
+
+</head>
+<body>
+
+<table class="book-table">
+<tr>
+
+<td class="book-table-col-prev" align="right">
+<div class="book-prev-topic">
+<button class="but_prev_topic">Prev Topic</button>
+</div>
+</td>
+
+<td class="book-table-col-modules" align="center">
+
+<modulesReplacementTarget/>
+
+</td>
+
+<td class="book-table-col-next" align="left">
+<div class="book-next-topic">
+<button class="but_next_topic">Next Topic</button>
+</div>
+
+</td>
+
+</tr>
+
+</table>
+
+<div class="bookbuttons">
+<button class="but_prev_mod">Prev Module</button>
+<button class="but_next_mod">Next Module</button>
+</div>
+
+</body>
+</html>

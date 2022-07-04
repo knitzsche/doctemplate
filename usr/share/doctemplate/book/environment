@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# set environment
+export DOC=book
+export TYPE=book
+export CUSTOM=../customization
+export DEFAULT_BUILD=html

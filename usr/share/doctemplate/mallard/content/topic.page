@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<page xmlns="http://projectmallard.org/1.0/"
+      type="topic"
+      id="topic"
+      >
+
+  <info>
+    <link type="guide" xref="guide"/>
+    <desc>
+      A plugin for <app>MyApp</app>.
+    </desc>
+
+  </info>
+
+
+  <p>Some content</p>
+
+</page>
